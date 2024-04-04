@@ -1,10 +1,3 @@
-//
-//  SceneDelegate.swift
-//  Tracker
-//
-//  Created by Сергей Никитин on 04.04.2024.
-//
-
 import UIKit
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -46,7 +39,5 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
     }
-
-
 }
 

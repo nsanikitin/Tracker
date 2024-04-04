@@ -1,7 +1,3 @@
-# ТЗ мобильного приложения для трекинга привычек
-
-# Ссылки
-
 [Дизайн Figma](https://www.figma.com/file/owAO4CAPTJdpM1BZU5JHv7/Tracker-(YP)?t=SZDLmkWeOPX4y6mp-0)
 
 # Назначение и цели приложения

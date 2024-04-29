@@ -6,7 +6,8 @@ final class TrackersViewController: UIViewController {
     
     private lazy var trackStubLabel: UILabel = UILabel()
     private lazy var trackStubImageView: UIImageView = UIImageView()
-    
+    private var currentDate: Date = Date()
+    var currentCategories = [TrackerCategory]()
     var categories: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
 
@@ -18,10 +19,10 @@ final class TrackersViewController: UIViewController {
         
         view.backgroundColor = .ypWhite
         setupNavigationBar()
-        setupViews()
+        setupViewComponents()
     }
     
-    // MARK: - View Configuration Methods
+    // MARK: - Methods
     
     private func setupNavigationBar() {
         title = "Трекеры"
@@ -50,8 +51,8 @@ final class TrackersViewController: UIViewController {
         self.navigationItem.searchController = searchField
     }
     
-    private func setupViews() {
-        guard !categories.isEmpty  else {
+    private func setupViewComponents() {
+        guard !currentCategories.isEmpty  else {
             setupTrackImageStub()
             setupTrackLabelStub()
             return
@@ -91,10 +92,24 @@ final class TrackersViewController: UIViewController {
     
     @objc
     private func addTrackButtonDidTape() {
-        // TODO: - Add action by track button tape
+        let vc = TrackerCreationViewController()
+        vc.originalViewController = self
+        let navigationController = UINavigationController(rootViewController: vc)
+        self.present(navigationController, animated: true)
     }
     
-    @objc func datePickerValueChanged(_ sender: UIDatePicker) {
-        // TODO: - Add date change of date picker
+    @objc 
+    private func datePickerValueChanged(_ sender: UIDatePicker) {
+        // TODO: - Add action with date picker
     }
 }
+
+// MARK: - Extensions
+
+extension TrackersViewController: TrackerCreationSetupViewControllerDelegate {
+    
+    func updateCategories(trackerCategory: TrackerCategory) {
+        // TODO: - Add updating of categories
+    }
+}
+

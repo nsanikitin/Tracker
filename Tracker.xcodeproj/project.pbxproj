@@ -17,6 +17,8 @@
 		4FC52ACA2BDFFB700052B4CF /* Tracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC52AC92BDFFB700052B4CF /* Tracker.swift */; };
 		4FC52ACC2BDFFCF50052B4CF /* TrackerCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC52ACB2BDFFCF50052B4CF /* TrackerCategory.swift */; };
 		4FC52ACE2BDFFDAF0052B4CF /* TrackerRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC52ACD2BDFFDAF0052B4CF /* TrackerRecord.swift */; };
+		4FC52AD02BE005750052B4CF /* TrackerCreationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC52ACF2BE005750052B4CF /* TrackerCreationViewController.swift */; };
+		4FC52AD22BE026730052B4CF /* TrackerCreationSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC52AD12BE026730052B4CF /* TrackerCreationSetupViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +34,8 @@
 		4FC52AC92BDFFB700052B4CF /* Tracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tracker.swift; sourceTree = "<group>"; };
 		4FC52ACB2BDFFCF50052B4CF /* TrackerCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerCategory.swift; sourceTree = "<group>"; };
 		4FC52ACD2BDFFDAF0052B4CF /* TrackerRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerRecord.swift; sourceTree = "<group>"; };
+		4FC52ACF2BE005750052B4CF /* TrackerCreationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerCreationViewController.swift; sourceTree = "<group>"; };
+		4FC52AD12BE026730052B4CF /* TrackerCreationSetupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerCreationSetupViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +85,8 @@
 			isa = PBXGroup;
 			children = (
 				4FB897372BBF276800D65F2E /* TrackersViewController.swift */,
+				4FC52ACF2BE005750052B4CF /* TrackerCreationViewController.swift */,
+				4FC52AD12BE026730052B4CF /* TrackerCreationSetupViewController.swift */,
 			);
 			path = Trackers;
 			sourceTree = "<group>";
@@ -187,6 +193,8 @@
 				4FB897342BBF276800D65F2E /* AppDelegate.swift in Sources */,
 				4FB897362BBF276800D65F2E /* SceneDelegate.swift in Sources */,
 				4FB8974D2BBF38BD00D65F2E /* TabBarController.swift in Sources */,
+				4FC52AD22BE026730052B4CF /* TrackerCreationSetupViewController.swift in Sources */,
+				4FC52AD02BE005750052B4CF /* TrackerCreationViewController.swift in Sources */,
 				4FB8974B2BBF383F00D65F2E /* StatisticViewController.swift in Sources */,
 				4FC52ACC2BDFFCF50052B4CF /* TrackerCategory.swift in Sources */,
 			);

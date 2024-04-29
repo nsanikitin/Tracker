@@ -7,7 +7,8 @@ final class TrackersViewController: UIViewController {
     private lazy var trackStubLabel: UILabel = UILabel()
     private lazy var trackStubImageView: UIImageView = UIImageView()
     
-    private var tracks: Int = 0
+    var categories: [TrackerCategory] = []
+    var completedTrackers: [TrackerRecord] = []
 
     
     // MARK: - Lifecycle
@@ -50,7 +51,7 @@ final class TrackersViewController: UIViewController {
     }
     
     private func setupViews() {
-        guard tracks != 0  else {
+        guard !categories.isEmpty  else {
             setupTrackImageStub()
             setupTrackLabelStub()
             return

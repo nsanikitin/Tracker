@@ -12,11 +12,11 @@ final class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        configureTabBarAppearance()
-        configureTabBarItems()
+        setupTabBarAppearance()
+        setupTabBarItems()
     }
     
-    private func configureTabBarAppearance() {
+    private func setupTabBarAppearance() {
         if #available(iOS 15.0, *) {
             let appearance = UITabBarAppearance()
             appearance.backgroundColor = .ypWhite
@@ -24,7 +24,7 @@ final class TabBarController: UITabBarController {
         }
     }
     
-    private func configureTabBarItems() {
+    private func setupTabBarItems() {
         // Track Tab
         trackersViewController.tabBarItem = UITabBarItem(
             title: "Трекеры",

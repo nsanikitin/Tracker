@@ -8,6 +8,7 @@ final class TrackersViewController: UIViewController {
     private lazy var trackStubImageView: UIImageView = UIImageView()
     
     private var tracks: Int = 0
+
     
     // MARK: - Lifecycle
     
@@ -15,26 +16,50 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .ypWhite
+        setupNavigationBar()
+        setupViews()
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    // MARK: - View Configuration Methods
+    
+    private func setupNavigationBar() {
+        title = "Трекеры"
+        navigationController?.navigationBar.prefersLargeTitles = true
         
-        isTrackListEmpty()
+        // Nav Button
+        let addTrackButton = UIBarButtonItem(
+            image: UIImage(named: "plusButton"),
+            style: .plain,
+            target: self,
+            action: #selector(addTrackButtonDidTape)
+        )
+        addTrackButton.tintColor = .ypBlack
+        self.navigationItem.leftBarButtonItem = addTrackButton
+        
+        // Nav DatePicker
+        let datePicker = UIDatePicker()
+        datePicker.preferredDatePickerStyle = .compact
+        datePicker.datePickerMode = .date
+        datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
+        
+        // Nav Search Field
+        let searchField = UISearchController(searchResultsController: nil)
+        searchField.automaticallyShowsCancelButton = true
+        self.navigationItem.searchController = searchField
     }
     
-    // MARK: - Methods
-    
-    func isTrackListEmpty() {
-        if tracks == 0 {
+    private func setupViews() {
+        guard tracks != 0  else {
             setupTrackImageStub()
             setupTrackLabelStub()
+            return
         }
+        
+        // TODO: - Add setup trackers views
     }
     
-    // MARK: - View Configuration
-    
-    func setupTrackImageStub() {
+    private func setupTrackImageStub() {
         guard let trackStubImage = UIImage(named: "trackStub") else { return }
         trackStubImageView = UIImageView(image: trackStubImage)
         
@@ -47,7 +72,7 @@ final class TrackersViewController: UIViewController {
         ])
     }
     
-    func setupTrackLabelStub() {
+    private func setupTrackLabelStub() {
         trackStubLabel.text = "Что будем отслеживать?"
         trackStubLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         trackStubLabel.textColor = .ypBlack
@@ -55,8 +80,20 @@ final class TrackersViewController: UIViewController {
         trackStubLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(trackStubLabel)
         
-        trackStubLabel.topAnchor.constraint(equalTo: trackStubImageView.bottomAnchor, constant: 8).isActive = true
-        trackStubLabel.centerXAnchor.constraint(equalTo: trackStubImageView.centerXAnchor).isActive = true
+        NSLayoutConstraint.activate([
+            trackStubLabel.topAnchor.constraint(equalTo: trackStubImageView.bottomAnchor, constant: 8),
+            trackStubLabel.centerXAnchor.constraint(equalTo: trackStubImageView.centerXAnchor)
+        ])
+    }
+    
+    // MARK: - Actions
+    
+    @objc
+    private func addTrackButtonDidTape() {
+        // TODO: - Add action by track button tape
+    }
+    
+    @objc func datePickerValueChanged(_ sender: UIDatePicker) {
+        // TODO: - Add date change of date picker
     }
 }
-

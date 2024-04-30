@@ -18,5 +18,18 @@ final class TrackerCreationSetupViewController: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .ypWhite
+        setupNavigationBar()
+        setupViewComponents()
     }
+    
+    // MARK: - Methods
+    
+    private func setupNavigationBar() {
+        title = isHabit ? "Новая привычка" : "Новое нерегулярное событие"
+    }
+    
+    private func setupViewComponents() {
+        
+    }
+
 }

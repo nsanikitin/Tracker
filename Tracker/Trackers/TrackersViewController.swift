@@ -1,15 +1,24 @@
 import UIKit
 
-final class TrackersViewController: UIViewController {
+final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     
     // MARK: - Properties
     
+    private var currentDate: Date = Date()
     private lazy var trackStubLabel: UILabel = UILabel()
     private lazy var trackStubImageView: UIImageView = UIImageView()
-    private var currentDate: Date = Date()
+    private lazy var trackersCollectionView: UICollectionView = {
+        let collectionView = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: UICollectionViewFlowLayout()
+        )
+        return collectionView
+    }()
+    
     var currentCategories = [TrackerCategory]()
     var categories: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
+    var selectedDate: Date = Date()
 
     
     // MARK: - Lifecycle
@@ -42,6 +51,7 @@ final class TrackersViewController: UIViewController {
         let datePicker = UIDatePicker()
         datePicker.preferredDatePickerStyle = .compact
         datePicker.datePickerMode = .date
+        datePicker.locale = Locale(identifier: "ru_RU")
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         
@@ -58,8 +68,10 @@ final class TrackersViewController: UIViewController {
             return
         }
         
-        // TODO: - Add setup trackers views
+        setupCollectionView()
     }
+    
+    // MARK: - Trackers View Configuration
     
     private func setupTrackImageStub() {
         guard let trackStubImage = UIImage(named: "trackStub") else { return }
@@ -88,6 +100,24 @@ final class TrackersViewController: UIViewController {
         ])
     }
     
+    private func setupCollectionView() {
+        self.trackersCollectionView.dataSource = self
+        self.trackersCollectionView.delegate = self
+        trackersCollectionView.register(UICollectionView.self, forCellWithReuseIdentifier: "cell")
+        trackersCollectionView.register(TrackerCellView.self, forCellWithReuseIdentifier: "cell")
+        trackersCollectionView.register(HeaderViewController.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "header")
+        
+        trackersCollectionView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(trackersCollectionView)
+        
+        NSLayoutConstraint.activate([
+            trackersCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            trackersCollectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            trackersCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            trackersCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 16)
+        ])
+    }
+    
     // MARK: - Actions
     
     @objc
@@ -100,16 +130,31 @@ final class TrackersViewController: UIViewController {
     
     @objc 
     private func datePickerValueChanged(_ sender: UIDatePicker) {
-        // TODO: - Add action with date picker
+        let selectedDate = sender.date
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd.MM.yyyy"
+        let formattedDate = dateFormatter.string(from: selectedDate)
+        print("Выбранная дата: \(formattedDate)")
     }
 }
 
 // MARK: - Extensions
 
+extension TrackersViewController: UICollectionViewDataSource {
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        <#code#>
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        <#code#>
+    }
+}
+
 extension TrackersViewController: TrackerCreationSetupViewControllerDelegate {
     
     func updateCategories(trackerCategory: TrackerCategory) {
-        // TODO: - Add updating of categories
+        
     }
 }
 

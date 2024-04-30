@@ -19,6 +19,8 @@
 		4FC52ACE2BDFFDAF0052B4CF /* TrackerRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC52ACD2BDFFDAF0052B4CF /* TrackerRecord.swift */; };
 		4FC52AD02BE005750052B4CF /* TrackerCreationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC52ACF2BE005750052B4CF /* TrackerCreationViewController.swift */; };
 		4FC52AD22BE026730052B4CF /* TrackerCreationSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC52AD12BE026730052B4CF /* TrackerCreationSetupViewController.swift */; };
+		4FC52AD52BE044C00052B4CF /* TrackerCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC52AD42BE044C00052B4CF /* TrackerCellView.swift */; };
+		4FC52AD72BE045D30052B4CF /* HeaderViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC52AD62BE045D30052B4CF /* HeaderViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +38,8 @@
 		4FC52ACD2BDFFDAF0052B4CF /* TrackerRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerRecord.swift; sourceTree = "<group>"; };
 		4FC52ACF2BE005750052B4CF /* TrackerCreationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerCreationViewController.swift; sourceTree = "<group>"; };
 		4FC52AD12BE026730052B4CF /* TrackerCreationSetupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerCreationSetupViewController.swift; sourceTree = "<group>"; };
+		4FC52AD42BE044C00052B4CF /* TrackerCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerCellView.swift; sourceTree = "<group>"; };
+		4FC52AD62BE045D30052B4CF /* HeaderViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +78,7 @@
 				4FB897472BBF373200D65F2E /* Trackers */,
 				4FB897482BBF374500D65F2E /* Statistic */,
 				4FC52AC82BDFFB5C0052B4CF /* Models */,
+				4FC52AD82BE0EE710052B4CF /* Helpers */,
 				4FB8973E2BBF276900D65F2E /* LaunchScreen.storyboard */,
 				4FB8973C2BBF276900D65F2E /* Assets.xcassets */,
 				4FB897412BBF276900D65F2E /* Info.plist */,
@@ -84,9 +89,10 @@
 		4FB897472BBF373200D65F2E /* Trackers */ = {
 			isa = PBXGroup;
 			children = (
+				4FC52AD32BE02F1E0052B4CF /* TrackerCreation */,
 				4FB897372BBF276800D65F2E /* TrackersViewController.swift */,
-				4FC52ACF2BE005750052B4CF /* TrackerCreationViewController.swift */,
-				4FC52AD12BE026730052B4CF /* TrackerCreationSetupViewController.swift */,
+				4FC52AD42BE044C00052B4CF /* TrackerCellView.swift */,
+				4FC52AD62BE045D30052B4CF /* HeaderViewController.swift */,
 			);
 			path = Trackers;
 			sourceTree = "<group>";
@@ -115,6 +121,22 @@
 				4FC52ACD2BDFFDAF0052B4CF /* TrackerRecord.swift */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		4FC52AD32BE02F1E0052B4CF /* TrackerCreation */ = {
+			isa = PBXGroup;
+			children = (
+				4FC52ACF2BE005750052B4CF /* TrackerCreationViewController.swift */,
+				4FC52AD12BE026730052B4CF /* TrackerCreationSetupViewController.swift */,
+			);
+			path = TrackerCreation;
+			sourceTree = "<group>";
+		};
+		4FC52AD82BE0EE710052B4CF /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -192,7 +214,9 @@
 				4FB897382BBF276800D65F2E /* TrackersViewController.swift in Sources */,
 				4FB897342BBF276800D65F2E /* AppDelegate.swift in Sources */,
 				4FB897362BBF276800D65F2E /* SceneDelegate.swift in Sources */,
+				4FC52AD72BE045D30052B4CF /* HeaderViewController.swift in Sources */,
 				4FB8974D2BBF38BD00D65F2E /* TabBarController.swift in Sources */,
+				4FC52AD52BE044C00052B4CF /* TrackerCellView.swift in Sources */,
 				4FC52AD22BE026730052B4CF /* TrackerCreationSetupViewController.swift in Sources */,
 				4FC52AD02BE005750052B4CF /* TrackerCreationViewController.swift in Sources */,
 				4FB8974B2BBF383F00D65F2E /* StatisticViewController.swift in Sources */,

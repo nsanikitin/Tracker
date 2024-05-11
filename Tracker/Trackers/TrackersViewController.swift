@@ -4,7 +4,6 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     
     // MARK: - Properties
     
-    private var currentDate: Date = Date()
     private lazy var trackStubLabel: UILabel = UILabel()
     private lazy var trackStubImageView: UIImageView = UIImageView()
     private lazy var trackersCollectionView: UICollectionView = {
@@ -18,8 +17,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     var currentCategories = [TrackerCategory]()
     var categories: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
-    var selectedDate: Date = Date()
-
+    var currentDate: Date = Date()
     
     // MARK: - Lifecycle
     
@@ -29,6 +27,13 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         view.backgroundColor = .ypWhite
         setupNavigationBar()
         setupViewComponents()
+        
+        // TODO: - Фильтр трекеров по дате из дейтпикера
+        // При изменении даты отображаются трекеры привычек, которые должны быть видны в день недели, выбранный в UIDatePicker
+        
+        // Когда пользователь нажимает на + в ячейке трекера, добавляется соответствующая запись в completedTrackers. Если пользователь убирает пометку о выполненности в ячейке трекера, элемент удаляется из массива. Чтобы не выполнять линейный поиск по массиву, используйте Set, в котором хранятся id выполненных трекеров;
+        
+        // новые трекеры добавляются в соответствующую категорию в массиве categories. Чтобы их добавить, нужно создать новую категорию с новым списком трекеров, а затем создать новый список категорий и присвоить его в categories. Мы не рекомендуем менять существующий массив, лучше создайте новый — так будет меньше пространства для трудноуловимых ошибок синхронизации данных;
     }
     
     // MARK: - Methods
@@ -74,7 +79,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     // MARK: - Trackers View Configuration
     
     private func setupTrackImageStub() {
-        guard let trackStubImage = UIImage(named: "trackStub") else { return }
+        guard let trackStubImage = UIImage(named: "stub") else { return }
         trackStubImageView = UIImageView(image: trackStubImage)
         
         trackStubImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -123,7 +128,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     @objc
     private func addTrackButtonDidTape() {
         let vc = TrackerCreationViewController()
-        vc.originalViewController = self
+        // vc.originalViewController = self
         let navigationController = UINavigationController(rootViewController: vc)
         self.present(navigationController, animated: true)
     }
@@ -143,18 +148,11 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
 extension TrackersViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        <#code#>
+        return 1
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        <#code#>
+        let cell = UICollectionViewCell()
+        return cell
     }
 }
-
-extension TrackersViewController: TrackerCreationSetupViewControllerDelegate {
-    
-    func updateCategories(trackerCategory: TrackerCategory) {
-        
-    }
-}
-

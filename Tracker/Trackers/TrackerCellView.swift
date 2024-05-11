@@ -138,7 +138,7 @@ final class TrackerCellView: UICollectionViewCell {
     
     @objc
     private func completedTrackButtonDidTape() {
-        guard currentDate > TrackersVC.selectedDate else { return }
+        guard currentDate > TrackersVC.currentDate else { return }
         
         if isTrackerCompleted {
             daysCounter -= 1

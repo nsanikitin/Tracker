@@ -25,18 +25,16 @@ final class TrackerCreationViewController: UIViewController {
         button.backgroundColor = .ypBlack
         button.tintColor = .ypWhite
         button.setTitle(title, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.buttonFontSize)
         
         view.addSubview(button)
         button.layer.masksToBounds = true
-        button.layer.cornerRadius = 16
+        button.layer.cornerRadius = ViewConfigurationConstants.elementsCornerRadius
     }
     
     private func switchToNextViewController(isHabit: Bool) {
         let vc = TrackerCreationSetupViewController()
         vc.isHabit = isHabit
-        vc.previosViewController = self
-        vc.delegate = originalViewController
         
         let navigationController = UINavigationController(rootViewController: vc)
         navigationController.modalPresentationStyle = .popover

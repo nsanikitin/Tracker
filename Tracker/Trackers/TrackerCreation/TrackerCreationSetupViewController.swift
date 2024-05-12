@@ -1,5 +1,9 @@
 import UIKit
 
+protocol TrackerCreationSetupViewControllerDelegate: AnyObject {
+    func updateTrackerCategory(for category: TrackerCategory)
+}
+
 final class TrackerCreationSetupViewController: UIViewController {
     
     // MARK: - Properties
@@ -9,32 +13,14 @@ final class TrackerCreationSetupViewController: UIViewController {
     private var newTrackerSchedule: [WeekDay] = []
     private var newTrackerEmoji: String?
     private var newTrackerColor: UIColor?
-    private var shortSchedule: String = "" {
-        didSet {
-            trackerCategoryAndScheduleTableView.reloadData()
-        }
-    }
+    private var shortSchedule: String = ""
     
-    private let emojiCollectionView = {
-        let collectionView = UICollectionView(
-            frame: .zero,
-            collectionViewLayout: UICollectionViewFlowLayout()
-        )
-        collectionView.register(EmojiCollectionViewCell.self, forCellWithReuseIdentifier: "cell")
-        return collectionView
-    }()
-    private let colorCollectionView = {
-        let collectionView = UICollectionView(
-            frame: .zero,
-            collectionViewLayout: UICollectionViewFlowLayout()
-        )
-        collectionView.register(ColorCollectionViewCell.self, forCellWithReuseIdentifier: "cell")
-        return collectionView
-    }()
     private let createTrackerButton = UIButton()
     private let cancelButton = UIButton()
     private let trackerNameTextField = UITextField()
     
+    weak var delegate: TrackerCreationSetupViewControllerDelegate?
+    var previousVC: UIViewController?
     var isHabit: Bool = false
     
     // MARK: - Lifecycle
@@ -49,21 +35,30 @@ final class TrackerCreationSetupViewController: UIViewController {
     
     // MARK: - Methods
     
-    private func activateCreateTrackerButton() {
-        createTrackerButton.isEnabled = true
-        createTrackerButton.backgroundColor = .ypBlack
+    private func switchToNextViewController(to vc: UIViewController) {
+        let navigationController = UINavigationController(rootViewController: vc)
+        self.present(navigationController, animated: true)
     }
     
     private func isTrackerDataReady() {
-        guard newTrackerName == nil,
-        newTrackerColor == nil,
-        newTrackerEmoji == nil else {
-            return
+        if isHabit,
+           newTrackerName != nil,
+           !newTrackerSchedule.isEmpty {
+            activateCreateTrackerButton()
+        } else {
+            if !isHabit,
+               newTrackerName != nil {
+                activateCreateTrackerButton()
+            }
         }
-        guard !isHabit, newTrackerSchedule.isEmpty else {
-            return
-        }
-        activateCreateTrackerButton()
+        // TODO: - Add checking emoji, color and category of tracker
+        
+        return
+    }
+    
+    private func activateCreateTrackerButton() {
+        createTrackerButton.isEnabled = true
+        createTrackerButton.backgroundColor = .ypBlack
     }
     
     // MARK: - Tracker Creation Setup View Configuration
@@ -75,22 +70,20 @@ final class TrackerCreationSetupViewController: UIViewController {
     private func setupViewComponents() {
         setupTrackerNameTextField()
         setupTableView()
-        // setupEmojiCollectionView()
-        // setupColorCollectionView()
         setupCreateTrackerButton()
         setupCancelButton()
     }
     
     private func setupTrackerNameTextField() {
         trackerNameTextField.placeholder = "Введите название трекера"
-        trackerNameTextField.clearButtonMode = .whileEditing
-        trackerNameTextField.backgroundColor = .ypBackground
         trackerNameTextField.textColor = .ypBlack
         trackerNameTextField.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.fieldFontSize)
         trackerNameTextField.leftViewMode = .always
         trackerNameTextField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: trackerNameTextField.frame.height))
-        trackerNameTextField.keyboardType = .default
-        trackerNameTextField.returnKeyType = .default
+        trackerNameTextField.backgroundColor = .ypBackground
+        trackerNameTextField.clearButtonMode = .whileEditing
+        
+        trackerNameTextField.delegate = self
         trackerNameTextField.addTarget(self, action: #selector(setTrackerName), for: .editingDidEndOnExit)
         
         trackerNameTextField.layer.masksToBounds = true
@@ -103,7 +96,7 @@ final class TrackerCreationSetupViewController: UIViewController {
             trackerNameTextField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             trackerNameTextField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             trackerNameTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-            trackerNameTextField.heightAnchor.constraint(equalToConstant: 75)
+            trackerNameTextField.heightAnchor.constraint(equalToConstant: ViewConfigurationConstants.textFieldRowHeight)
         ])
     }
     
@@ -128,33 +121,6 @@ final class TrackerCreationSetupViewController: UIViewController {
         ])
     }
     
-    private func setupEmojiCollectionView() {
-        emojiCollectionView.backgroundColor = .ypWhite
-        
-        emojiCollectionView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(emojiCollectionView)
-        
-        NSLayoutConstraint.activate([
-            emojiCollectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            emojiCollectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            emojiCollectionView.topAnchor.constraint(equalTo: trackerCategoryAndScheduleTableView.bottomAnchor, constant: 50)
-        ])
-    }
-    
-    private func setupColorCollectionView() {
-        colorCollectionView.backgroundColor = .ypWhite
-        
-        colorCollectionView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(colorCollectionView)
-        
-        NSLayoutConstraint.activate([
-            colorCollectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            colorCollectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            colorCollectionView.topAnchor.constraint(equalTo: emojiCollectionView.bottomAnchor, constant: 34),
-            colorCollectionView.bottomAnchor.constraint(equalTo: cancelButton.topAnchor, constant: 16)
-        ])
-    }
-    
     private func setupCreateTrackerButton(){
         createTrackerButton.setTitle("Создать", for: .normal)
         createTrackerButton.setTitleColor(.ypWhite, for: .normal)
@@ -174,7 +140,7 @@ final class TrackerCreationSetupViewController: UIViewController {
             createTrackerButton.leadingAnchor.constraint(equalTo: view.centerXAnchor, constant: 4),
             createTrackerButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
             createTrackerButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            createTrackerButton.heightAnchor.constraint(equalToConstant: 60)
+            createTrackerButton.heightAnchor.constraint(equalToConstant: ViewConfigurationConstants.buttonHeight)
         ])
     }
     
@@ -207,12 +173,23 @@ final class TrackerCreationSetupViewController: UIViewController {
     
     @objc
     private func createTrackerButtonDidTape() {
+        guard let newTrackerName = newTrackerName,
+              newTrackerSchedule.isEmpty
+        else {
+            assertionFailure("Tracker data is invalid")
+            return
+        }
         let newTracker = Tracker(id: UUID(),
-                                 name: newTrackerName ?? "",
-                                 color: newTrackerColor ?? .clear,
-                                 emoji: newTrackerEmoji ?? "",
+                                 name: newTrackerName,
+                                 color: .color1,
+                                 emoji: "🙂",
                                  schedule: newTrackerSchedule)
+        // TODO: - Add emoji and color transfer
+        let updatingTrackerCategory = TrackerCategory(title: "По умолчанию",
+                                                      trackers: [newTracker])
+        delegate?.updateTrackerCategory(for: updatingTrackerCategory)
         self.dismiss(animated: true)
+        previousVC?.dismiss(animated: true)
     }
     
     @objc
@@ -221,11 +198,11 @@ final class TrackerCreationSetupViewController: UIViewController {
     }
     
     @objc
-    private func setTrackerName(_ sender: UITextField) {
-        if sender.text?.isEmpty != nil {
-            newTrackerName = sender.text ?? ""
+    private func setTrackerName() {
+        if trackerNameTextField.text != nil {
+            newTrackerName = trackerNameTextField.text ?? ""
+            isTrackerDataReady()
         }
-        isTrackerDataReady()
     }
 }
 
@@ -246,21 +223,17 @@ extension TrackerCreationSetupViewController: UITableViewDataSource {
         cell.detailTextLabel?.textColor = .ypGray
         cell.detailTextLabel?.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.tableFontSize)
         cell.backgroundColor = .clear
-        cell.accessoryType = .disclosureIndicator
-        cell.selectionStyle = .none
         
-        switch indexPath.row {
-        case 0:
+        if indexPath.row == 0 {
             cell.detailTextLabel?.text = "" // TODO: - Add category value in subtitle
-        case 1:
+        } else {
             if newTrackerSchedule.count == 7 {
                 cell.detailTextLabel?.text = "Каждый день"
             } else {
                 cell.detailTextLabel?.text = shortSchedule
             }
-        default:
-            break
         }
+        cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
         
         return cell
     }
@@ -271,12 +244,11 @@ extension TrackerCreationSetupViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 0 {
             let vc = TrackerCategoryChoiceAndCreationViewController()
-            let navigationController = UINavigationController(rootViewController: vc)
-            self.present(navigationController, animated: true)
+            switchToNextViewController(to: vc)
         } else {
             let vc = TrackerScheduleViewController()
-            let navigationController = UINavigationController(rootViewController: vc)
-            self.present(navigationController, animated: true)
+            switchToNextViewController(to: vc)
+            vc.delegate = self
         }
     }
 }
@@ -289,7 +261,7 @@ extension TrackerCreationSetupViewController: UITextFieldDelegate {
         let maxLength = 38
         let currentString = (textField.text ?? "") as NSString
         let newString = currentString.replacingCharacters(in: range, with: string)
-
+        
         return newString.count <= maxLength
     }
     
@@ -309,6 +281,7 @@ extension TrackerCreationSetupViewController: ScheduleViewControllerDelegate {
             let scheduleRow = shortScheduleArray.joined(separator: ", ")
             return scheduleRow
         }()
+        trackerCategoryAndScheduleTableView.reloadData()
         isTrackerDataReady()
     }
 }

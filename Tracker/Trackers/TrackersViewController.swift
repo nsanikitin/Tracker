@@ -1,6 +1,6 @@
 import UIKit
 
-final class TrackersViewController: UIViewController, UICollectionViewDelegate {
+final class TrackersViewController: UIViewController {
     
     // MARK: - Properties
     
@@ -27,13 +27,6 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         view.backgroundColor = .ypWhite
         setupNavigationBar()
         setupViewComponents()
-        
-        // TODO: - Фильтр трекеров по дате из дейтпикера
-        // При изменении даты отображаются трекеры привычек, которые должны быть видны в день недели, выбранный в UIDatePicker
-        
-        // Когда пользователь нажимает на + в ячейке трекера, добавляется соответствующая запись в completedTrackers. Если пользователь убирает пометку о выполненности в ячейке трекера, элемент удаляется из массива. Чтобы не выполнять линейный поиск по массиву, используйте Set, в котором хранятся id выполненных трекеров;
-        
-        // новые трекеры добавляются в соответствующую категорию в массиве categories. Чтобы их добавить, нужно создать новую категорию с новым списком трекеров, а затем создать новый список категорий и присвоить его в categories. Мы не рекомендуем менять существующий массив, лучше создайте новый — так будет меньше пространства для трудноуловимых ошибок синхронизации данных;
     }
     
     // MARK: - Methods
@@ -44,7 +37,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         
         // Nav Button
         let addTrackButton = UIBarButtonItem(
-            image: UIImage(named: "plusButton"),
+            image: UIImage(systemName: "plus")?.applyingSymbolConfiguration(.init(pointSize: 18, weight: .semibold)),
             style: .plain,
             target: self,
             action: #selector(addTrackButtonDidTape)
@@ -62,6 +55,8 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
         
         // Nav Search Field
         let searchField = UISearchController(searchResultsController: nil)
+        searchField.searchBar.placeholder = "Поиск"
+        searchField.searchBar.setValue("Отменить", forKey: "cancelButtonText")
         searchField.automaticallyShowsCancelButton = true
         self.navigationItem.searchController = searchField
     }
@@ -128,7 +123,6 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     @objc
     private func addTrackButtonDidTape() {
         let vc = TrackerCreationViewController()
-        // vc.originalViewController = self
         let navigationController = UINavigationController(rootViewController: vc)
         self.present(navigationController, animated: true)
     }
@@ -143,7 +137,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
     }
 }
 
-// MARK: - Extensions
+// MARK: - Collection View Extensions
 
 extension TrackersViewController: UICollectionViewDataSource {
     
@@ -156,3 +150,17 @@ extension TrackersViewController: UICollectionViewDataSource {
         return cell
     }
 }
+
+extension TrackersViewController: UICollectionViewDelegateFlowLayout {
+    
+}
+
+// MARK: - TrackerCreationSetupViewControllerDelegate Extension
+
+extension TrackersViewController: TrackerCreationSetupViewControllerDelegate {
+    
+    func updateTrackerCategory(for category: TrackerCategory) {
+        
+    }
+}
+

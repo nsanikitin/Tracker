@@ -6,7 +6,6 @@ final class TrackerCreationViewController: UIViewController {
     
     private let habitButton = UIButton()
     private let irregularEventButton = UIButton()
-    var originalViewController: TrackersViewController?
     
     // MARK: - Lifecycle
     
@@ -26,18 +25,20 @@ final class TrackerCreationViewController: UIViewController {
         button.tintColor = .ypWhite
         button.setTitle(title, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.buttonFontSize)
+        button.isEnabled = true
         
-        view.addSubview(button)
         button.layer.masksToBounds = true
         button.layer.cornerRadius = ViewConfigurationConstants.elementsCornerRadius
+        
+        button.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(button)
     }
     
     private func switchToNextViewController(isHabit: Bool) {
         let vc = TrackerCreationSetupViewController()
         vc.isHabit = isHabit
-        
+        vc.previousVC = self
         let navigationController = UINavigationController(rootViewController: vc)
-        navigationController.modalPresentationStyle = .popover
         self.present(navigationController, animated: true)
     }
     
@@ -60,12 +61,13 @@ final class TrackerCreationViewController: UIViewController {
         )
         
         habitButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(habitButton)
         
         NSLayoutConstraint.activate([
-            habitButton.bottomAnchor.constraint(equalTo: view.centerYAnchor, constant: -8),
-            habitButton.heightAnchor.constraint(equalToConstant: 60),
             habitButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            habitButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20)
+            habitButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            habitButton.bottomAnchor.constraint(equalTo: view.centerYAnchor, constant: -8),
+            habitButton.heightAnchor.constraint(equalToConstant: ViewConfigurationConstants.buttonHeight)
         ])
     }
     
@@ -76,13 +78,11 @@ final class TrackerCreationViewController: UIViewController {
             selector: #selector(irregularEventButtonDidTape)
         )
         
-        irregularEventButton.translatesAutoresizingMaskIntoConstraints = false
-        
         NSLayoutConstraint.activate([
-            irregularEventButton.topAnchor.constraint(equalTo: view.centerYAnchor, constant: 8),
-            irregularEventButton.heightAnchor.constraint(equalToConstant: 60),
             irregularEventButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-            irregularEventButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20)
+            irregularEventButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            irregularEventButton.topAnchor.constraint(equalTo: view.centerYAnchor, constant: 8),
+            irregularEventButton.heightAnchor.constraint(equalToConstant: ViewConfigurationConstants.buttonHeight)
         ])
     }
     

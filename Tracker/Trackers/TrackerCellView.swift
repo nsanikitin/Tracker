@@ -1,31 +1,42 @@
 import UIKit
 
+protocol TrackerCellViewDelegate: AnyObject {
+    func addCompletedTracker(for trackerID: UUID)
+    func removeCompletedTracker(for trackerID: UUID)
+}
+
 final class TrackerCellView: UICollectionViewCell {
     
     // MARK: - Properties
     
+    static let identifier = "cell"
+    
     private let emojiLabel = UILabel()
     private let nameLabel = UILabel()
     private let daysCounterLabel = UILabel()
-    private let completedTrackButton = UIButton()
+    private let completeTrackButton = UIButton()
     private let trackColorView = UIView()
-    private let currentDate = Date()
     private let TrackersVC = TrackersViewController()
     
-    private var daysCounter: Int = 0
-    private var isTrackerCompleted: Bool = false
+    private lazy var currentDate = Date()
+    private lazy var daysCounter: UInt = 0
+    private lazy var isTrackerCompleted: Bool = false
+    private lazy var trackerID = UUID()
+    
+    weak var delegate: TrackerCellViewDelegate?
     
     // MARK: - Methods
     
-    func setupTrackerCell(tracker: Tracker) {
+    func setupTrackerCell(for tracker: Tracker) {
+        trackerID = tracker.id
         setupTrackColorView(with: tracker.color)
         setupEmojiLabel(with: tracker.emoji)
         setupNameLabel(with: tracker.name)
         setupDaysCounterLabel()
-        setupCompletedTrackButton(with: tracker.color)
+        setupCompleteTrackButton(with: tracker.color)
     }
     
-    private func setupDaysCounter(for number: Int) {
+    private func setupDaysCounter(for number: UInt) {
         switch number % 100 {
         case 1:
             daysCounterLabel.text = "\(number) день"
@@ -38,11 +49,11 @@ final class TrackerCellView: UICollectionViewCell {
     
     private func setupCompletedTrack() {
         if isTrackerCompleted {
-            completedTrackButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-            completedTrackButton.backgroundColor = completedTrackButton.backgroundColor?.withAlphaComponent(0.3)
+            completeTrackButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+            completeTrackButton.backgroundColor = completeTrackButton.backgroundColor?.withAlphaComponent(0.3)
         } else {
-            completedTrackButton.setImage(UIImage(systemName: "plus"), for: .normal)
-            completedTrackButton.backgroundColor = completedTrackButton.backgroundColor?.withAlphaComponent(1)
+            completeTrackButton.setImage(UIImage(systemName: "plus"), for: .normal)
+            completeTrackButton.backgroundColor = completeTrackButton.backgroundColor?.withAlphaComponent(1)
         }
     }
     
@@ -55,10 +66,11 @@ final class TrackerCellView: UICollectionViewCell {
         addSubview(trackColorView)
         
         trackColorView.layer.masksToBounds = true
-        trackColorView.layer.cornerRadius = 16
+        trackColorView.layer.cornerRadius = ViewConfigurationConstants.elementsCornerRadius
         
         NSLayoutConstraint.activate([
-            trackColorView.widthAnchor.constraint(equalToConstant: 167),
+            trackColorView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            trackColorView.trailingAnchor.constraint(equalTo: trailingAnchor),
             trackColorView.heightAnchor.constraint(equalToConstant: 90)
         ])
     }
@@ -85,7 +97,7 @@ final class TrackerCellView: UICollectionViewCell {
     
     private func setupNameLabel(with name: String) {
         nameLabel.text = name
-        nameLabel.font = UIFont.systemFont(ofSize: 12)
+        nameLabel.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.labelFontSize)
         nameLabel.textColor = .ypWhite
         nameLabel.textAlignment = .left
         nameLabel.numberOfLines = 2
@@ -96,41 +108,42 @@ final class TrackerCellView: UICollectionViewCell {
         
         NSLayoutConstraint.activate([
             nameLabel.leadingAnchor.constraint(equalTo: trackColorView.leadingAnchor, constant: 12),
-            nameLabel.trailingAnchor.constraint(equalTo: trackColorView.trailingAnchor, constant: 12)
+            nameLabel.trailingAnchor.constraint(equalTo: trackColorView.trailingAnchor, constant: 12),
+            nameLabel.bottomAnchor.constraint(equalTo: trackColorView.bottomAnchor, constant: -12)
         ])
     }
     
     private func setupDaysCounterLabel(){
         setupDaysCounter(for: daysCounter)
-        daysCounterLabel.font = UIFont.systemFont(ofSize: 12)
+        daysCounterLabel.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.labelFontSize)
         daysCounterLabel.textColor = .ypBlack
         
         daysCounterLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(daysCounterLabel)
         
         NSLayoutConstraint.activate([
-            daysCounterLabel.leadingAnchor.constraint(equalTo: nameLabel.leadingAnchor),
-            daysCounterLabel.centerYAnchor.constraint(equalTo: completedTrackButton.centerYAnchor)
+            daysCounterLabel.leadingAnchor.constraint(equalTo: trackColorView.leadingAnchor, constant: 12),
+            daysCounterLabel.topAnchor.constraint(equalTo: trackColorView.bottomAnchor, constant: 16)
         ])
     }
     
-    private func setupCompletedTrackButton(with color: UIColor) {
+    private func setupCompleteTrackButton(with color: UIColor) {
         setupCompletedTrack()
-        completedTrackButton.backgroundColor = color
-        completedTrackButton.tintColor = .ypWhite
-        completedTrackButton.addTarget(self, action: #selector(completedTrackButtonDidTape), for: .touchUpInside)
+        completeTrackButton.backgroundColor = color
+        completeTrackButton.tintColor = .ypWhite
+        completeTrackButton.addTarget(self, action: #selector(completedTrackButtonDidTape), for: .touchUpInside)
         
-        completedTrackButton.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(completedTrackButton)
+        completeTrackButton.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(completeTrackButton)
         
-        completedTrackButton.layer.masksToBounds = true
-        completedTrackButton.layer.cornerRadius = 17
+        completeTrackButton.layer.masksToBounds = true
+        completeTrackButton.layer.cornerRadius = 17
         
         NSLayoutConstraint.activate([
-            completedTrackButton.topAnchor.constraint(equalTo: trackColorView.bottomAnchor, constant: 8),
-            completedTrackButton.trailingAnchor.constraint(equalTo: trackColorView.trailingAnchor, constant: -12),
-            completedTrackButton.heightAnchor.constraint(equalToConstant: 34),
-            completedTrackButton.widthAnchor.constraint(equalToConstant: 34)
+            completeTrackButton.topAnchor.constraint(equalTo: trackColorView.bottomAnchor, constant: 8),
+            completeTrackButton.trailingAnchor.constraint(equalTo: trackColorView.trailingAnchor, constant: -12),
+            completeTrackButton.heightAnchor.constraint(equalToConstant: 34),
+            completeTrackButton.widthAnchor.constraint(equalToConstant: 34)
         ])
     }
     
@@ -138,12 +151,14 @@ final class TrackerCellView: UICollectionViewCell {
     
     @objc
     private func completedTrackButtonDidTape() {
-        guard currentDate > TrackersVC.currentDate else { return }
+        guard currentDate < TrackersVC.currentDate else { return }
         
         if isTrackerCompleted {
             daysCounter -= 1
+            delegate?.removeCompletedTracker(for: trackerID)
         } else {
             daysCounter += 1
+            delegate?.addCompletedTracker(for: trackerID)
         }
         
         isTrackerCompleted = !isTrackerCompleted

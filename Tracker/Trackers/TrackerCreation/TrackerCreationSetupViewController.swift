@@ -1,7 +1,7 @@
 import UIKit
 
 protocol TrackerCreationSetupViewControllerDelegate: AnyObject {
-    func updateTrackerCategory(for category: TrackerCategory)
+    func updateTrackerCategory(for trackerCategory: TrackerCategory)
 }
 
 final class TrackerCreationSetupViewController: UIViewController {
@@ -199,6 +199,7 @@ final class TrackerCreationSetupViewController: UIViewController {
     
     @objc
     private func setTrackerName() {
+        // TODO: - Add a red label about 39 symbols limit
         if trackerNameTextField.text != nil {
             newTrackerName = trackerNameTextField.text ?? ""
             isTrackerDataReady()

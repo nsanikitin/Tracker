@@ -1,13 +1,17 @@
 import UIKit
 
-final class HeaderViewController: UICollectionReusableView {
+final class TrackerHeaderView: UICollectionReusableView {
     
+    static let identifier = "header"
     let titleLabel = UILabel()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         
         titleLabel.font = UIFont.boldSystemFont(ofSize: 19)
+        titleLabel.textColor = .ypBlack
+        titleLabel.textAlignment = .left
+        titleLabel.backgroundColor = .clear
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(titleLabel)
@@ -15,7 +19,7 @@ final class HeaderViewController: UICollectionReusableView {
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 16),
             titleLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12),
-            titleLabel.leadingAnchor.constraint(equalTo: leftAnchor, constant: 12),
+            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
             titleLabel.heightAnchor.constraint(equalToConstant: 18)
         ])
     }

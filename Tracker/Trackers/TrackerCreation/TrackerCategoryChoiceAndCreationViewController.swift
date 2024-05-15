@@ -71,6 +71,7 @@ final class TrackerCategoryChoiceAndCreationViewController: UIViewController {
         categoryStubLabel.text = "Привычки и события можно объединить по смыслу"
         categoryStubLabel.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.labelFontSize, weight: .medium)
         categoryStubLabel.textColor = .ypBlack
+        categoryStubLabel.numberOfLines = 2
         
         categoryStubLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(categoryStubLabel)

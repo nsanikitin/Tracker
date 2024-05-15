@@ -68,15 +68,18 @@ final class TrackersViewController: UIViewController {
         return newTrackerCategory
     }
     
-    // MARK: - Trackers View Configuration
-    
-    private func setupViewComponents() {
-        if currentCategories.isEmpty {
-            showStubs()
-            return
+    private func removeTrackerFromCategory(for trackerID: UUID) {
+        var newCategories: [TrackerCategory] = []
+        for category in categories {
+            var newTrackers: [Tracker] = []
+            for tracker in category.trackers {
+                if trackerID != tracker.id {
+                    newTrackers.append(tracker)
+                }
+            }
+            newCategories.append(TrackerCategory(title: category.title, trackers: newTrackers))
         }
-        
-        setupCollectionView()
+        categories = newCategories
     }
     
     private func showStubs() {
@@ -87,6 +90,17 @@ final class TrackersViewController: UIViewController {
     private func hideStubs() {
         trackStubImageView.isHidden = true
         trackStubLabel.isHidden = true
+    }
+    
+    // MARK: - Trackers View Configuration
+    
+    private func setupViewComponents() {
+        if currentCategories.isEmpty {
+            showStubs()
+            return
+        }
+        
+        setupCollectionView()
     }
     
     private func setupNavigationBar() {
@@ -168,6 +182,7 @@ final class TrackersViewController: UIViewController {
     private func addTrackButtonDidTape() {
         let vc = TrackerCreationViewController()
         let navigationController = UINavigationController(rootViewController: vc)
+        vc.originalVC = self
         self.present(navigationController, animated: true)
     }
     
@@ -201,6 +216,17 @@ extension TrackersViewController: UICollectionViewDataSource {
         
         let currentTracker = currentCategories[indexPath.section].trackers[indexPath.row]
         cell.delegate = self
+        cell.trackerCurrentDate = currentDate
+        
+        let isTrackerCompleted = completedTrackers.contains { tracker in
+            if tracker.id == currentTracker.id && Calendar.current.isDate(tracker.date, inSameDayAs: currentDate) {
+                return true
+            } else { return false }
+        }
+        let completedDays = completedTrackers.filter{ $0.id == currentTracker.id }.count
+        
+        cell.isTrackerCompleted = isTrackerCompleted
+        cell.completedDaysCounter = completedDays
         cell.setupTrackerCell(for: currentTracker)
         
         return cell
@@ -254,12 +280,14 @@ extension TrackersViewController: TrackerCreationSetupViewControllerDelegate {
             if trackerCategory.title == category.title {
                 let newTrackers = category.trackers + trackerCategory.trackers
                 categories.append(TrackerCategory(title: category.title, trackers: newTrackers))
+                break
             } else {
                 categories.append(trackerCategory)
+                break
             }
         }
         
-        setupViewComponents()
+        getCurrentVisibleCategories()
     }
 }
 
@@ -270,6 +298,11 @@ extension TrackersViewController: TrackerCellViewDelegate {
     func addCompletedTracker(for trackerID: UUID) {
         let trackerRecord = TrackerRecord(id: trackerID, date: currentDate)
         completedTrackers.insert(trackerRecord)
+        
+        let trackerSetup = TrackerCreationSetupViewController()
+        if trackerSetup.isHabit == false {
+            removeTrackerFromCategory(for: trackerID)
+        }
     }
     
     func removeCompletedTracker(for trackerID: UUID) {

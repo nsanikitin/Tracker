@@ -1,12 +1,17 @@
 import UIKit
 
 protocol TrackerCreationSetupViewControllerDelegate: AnyObject {
+    
     func updateTrackerCategory(for trackerCategory: TrackerCategory)
 }
 
 final class TrackerCreationSetupViewController: UIViewController {
     
     // MARK: - Properties
+    
+    private let createTrackerButton = UIButton()
+    private let cancelButton = UIButton()
+    private let trackerNameTextField = UITextField()
     
     private var trackerCategoryAndScheduleTableView = UITableView()
     private var newTrackerName: String?
@@ -15,12 +20,9 @@ final class TrackerCreationSetupViewController: UIViewController {
     private var newTrackerColor: UIColor?
     private var shortSchedule: String = ""
     
-    private let createTrackerButton = UIButton()
-    private let cancelButton = UIButton()
-    private let trackerNameTextField = UITextField()
-    
     weak var delegate: TrackerCreationSetupViewControllerDelegate?
-    var previousVC: UIViewController?
+    weak var previousVC: UIViewController?
+    
     var isHabit: Bool = false
     
     // MARK: - Lifecycle
@@ -173,17 +175,24 @@ final class TrackerCreationSetupViewController: UIViewController {
     
     @objc
     private func createTrackerButtonDidTape() {
-        guard let newTrackerName = newTrackerName,
-              newTrackerSchedule.isEmpty
+        guard let newTrackerName = newTrackerName
         else {
-            assertionFailure("Tracker data is invalid")
+            assertionFailure("Tracker name is nil")
             return
         }
+        
+        if !isHabit {
+            newTrackerSchedule = WeekDay.allCases
+        }
+        
         let newTracker = Tracker(id: UUID(),
                                  name: newTrackerName,
                                  color: .color1,
                                  emoji: "🙂",
                                  schedule: newTrackerSchedule)
+        
+        
+        
         // TODO: - Add emoji and color transfer
         let updatingTrackerCategory = TrackerCategory(title: "По умолчанию",
                                                       trackers: [newTracker])
@@ -199,7 +208,7 @@ final class TrackerCreationSetupViewController: UIViewController {
     
     @objc
     private func setTrackerName() {
-        // TODO: - Add a red label about 39 symbols limit
+        // TODO: - Add a red label about 38 symbols limit
         if trackerNameTextField.text != nil {
             newTrackerName = trackerNameTextField.text ?? ""
             isTrackerDataReady()

@@ -6,14 +6,14 @@ public enum ViewConfigurationConstants {
     static let fieldFontSize: CGFloat = 17
     static let tableFontSize: CGFloat = 17
     static let buttonFontSize: CGFloat = 16
-    
+
+    static let elementsCornerRadius: CGFloat = 16
     static let buttonBorderWight: CGFloat = 1
     static let buttonHeight: CGFloat = 60
-    static let elementsCornerRadius: CGFloat = 16
     static let tableViewRowHeight: CGFloat = 75
     static let textFieldRowHeight: CGFloat = 75
     
-    static let emojies: [String] = [
+    static let trackerEmojies: [String] = [
         "🙂", "😻", "🌺", "🐶", "❤️", "😱",
         "😇", "😡", "🥶", "🤔", "🙌", "🍔",
         "🥦", "🏓", "🥇", "🎸", "🏝", "😪"

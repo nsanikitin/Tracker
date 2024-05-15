@@ -7,6 +7,8 @@ final class TrackerCreationViewController: UIViewController {
     private let habitButton = UIButton()
     private let irregularEventButton = UIButton()
     
+    weak var originalVC: TrackersViewController?
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -20,12 +22,13 @@ final class TrackerCreationViewController: UIViewController {
     // MARK: - Methods
     
     private func createButton(button: UIButton, title: String, selector: Selector) {
-        button.addTarget(self, action: selector, for: .touchUpInside)
         button.backgroundColor = .ypBlack
         button.tintColor = .ypWhite
         button.setTitle(title, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.buttonFontSize)
+        
         button.isEnabled = true
+        button.addTarget(self, action: selector, for: .touchUpInside)
         
         button.layer.masksToBounds = true
         button.layer.cornerRadius = ViewConfigurationConstants.elementsCornerRadius
@@ -38,6 +41,7 @@ final class TrackerCreationViewController: UIViewController {
         let vc = TrackerCreationSetupViewController()
         vc.isHabit = isHabit
         vc.previousVC = self
+        vc.delegate = originalVC
         let navigationController = UINavigationController(rootViewController: vc)
         self.present(navigationController, animated: true)
     }

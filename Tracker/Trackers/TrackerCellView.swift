@@ -1,6 +1,7 @@
 import UIKit
 
 protocol TrackerCellViewDelegate: AnyObject {
+    
     func addCompletedTracker(for trackerID: UUID)
     func removeCompletedTracker(for trackerID: UUID)
 }
@@ -18,10 +19,11 @@ final class TrackerCellView: UICollectionViewCell {
     private let trackColorView = UIView()
     private let TrackersVC = TrackersViewController()
     
-    private lazy var currentDate = Date()
-    private lazy var daysCounter: UInt = 0
-    private lazy var isTrackerCompleted: Bool = false
     private lazy var trackerID = UUID()
+    
+    lazy var trackerCurrentDate = Date()
+    lazy var completedDaysCounter: Int = 0
+    lazy var isTrackerCompleted: Bool = false
     
     weak var delegate: TrackerCellViewDelegate?
     
@@ -36,7 +38,7 @@ final class TrackerCellView: UICollectionViewCell {
         setupCompleteTrackButton(with: tracker.color)
     }
     
-    private func setupDaysCounter(for number: UInt) {
+    private func setupDaysCounter(for number: Int) {
         switch number % 100 {
         case 1:
             daysCounterLabel.text = "\(number) день"
@@ -114,7 +116,7 @@ final class TrackerCellView: UICollectionViewCell {
     }
     
     private func setupDaysCounterLabel(){
-        setupDaysCounter(for: daysCounter)
+        setupDaysCounter(for: completedDaysCounter)
         daysCounterLabel.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.labelFontSize)
         daysCounterLabel.textColor = .ypBlack
         
@@ -128,10 +130,11 @@ final class TrackerCellView: UICollectionViewCell {
     }
     
     private func setupCompleteTrackButton(with color: UIColor) {
-        setupCompletedTrack()
         completeTrackButton.backgroundColor = color
         completeTrackButton.tintColor = .ypWhite
-        completeTrackButton.addTarget(self, action: #selector(completedTrackButtonDidTape), for: .touchUpInside)
+        setupCompletedTrack()
+        
+        completeTrackButton.addTarget(self, action: #selector(completeTrackButtonDidTape), for: .touchUpInside)
         
         completeTrackButton.translatesAutoresizingMaskIntoConstraints = false
         addSubview(completeTrackButton)
@@ -150,19 +153,19 @@ final class TrackerCellView: UICollectionViewCell {
     // MARK: - Actions
     
     @objc
-    private func completedTrackButtonDidTape() {
-        guard currentDate < TrackersVC.currentDate else { return }
+    private func completeTrackButtonDidTape() {
+        if trackerCurrentDate >= TrackersVC.currentDate { return }
         
         if isTrackerCompleted {
-            daysCounter -= 1
+            completedDaysCounter -= 1
             delegate?.removeCompletedTracker(for: trackerID)
         } else {
-            daysCounter += 1
+            completedDaysCounter += 1
             delegate?.addCompletedTracker(for: trackerID)
         }
         
         isTrackerCompleted = !isTrackerCompleted
-        setupDaysCounter(for: daysCounter)
+        setupDaysCounter(for: completedDaysCounter)
         setupCompletedTrack()
     }
 }

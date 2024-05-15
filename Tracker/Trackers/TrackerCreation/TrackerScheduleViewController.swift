@@ -1,6 +1,7 @@
 import UIKit
 
 protocol ScheduleViewControllerDelegate: AnyObject {
+    
     func saveTrackerSchedule(schedule: [WeekDay])
 }
 

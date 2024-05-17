@@ -4,8 +4,8 @@ final class TrackerCreationViewController: UIViewController {
     
     // MARK: - Properties
     
-    private let habitButton = UIButton()
-    private let irregularEventButton = UIButton()
+    private lazy var habitButton = UIButton()
+    private lazy var irregularEventButton = UIButton()
     
     weak var originalVC: TrackersViewController?
     
@@ -37,7 +37,7 @@ final class TrackerCreationViewController: UIViewController {
         view.addSubview(button)
     }
     
-    private func switchToNextViewController(isHabit: Bool) {
+    private func switchToTrackerCreationSetupViewController(isHabit: Bool) {
         let vc = TrackerCreationSetupViewController()
         vc.isHabit = isHabit
         vc.previousVC = self
@@ -61,7 +61,7 @@ final class TrackerCreationViewController: UIViewController {
         createButton(
             button: habitButton,
             title: "Привычка",
-            selector: #selector(habitButtonDidTape)
+            selector: #selector(habitButtonDidTap)
         )
         
         habitButton.translatesAutoresizingMaskIntoConstraints = false
@@ -79,7 +79,7 @@ final class TrackerCreationViewController: UIViewController {
         createButton(
             button: irregularEventButton,
             title: "Нерегулярное событие",
-            selector: #selector(irregularEventButtonDidTape)
+            selector: #selector(irregularEventButtonDidTap)
         )
         
         NSLayoutConstraint.activate([
@@ -93,12 +93,12 @@ final class TrackerCreationViewController: UIViewController {
     // MARK: - Actions
     
     @objc
-    private func habitButtonDidTape() {
-        switchToNextViewController(isHabit: true)
+    private func habitButtonDidTap() {
+        switchToTrackerCreationSetupViewController(isHabit: true)
     }
     
     @objc
-    private func irregularEventButtonDidTape() {
-        switchToNextViewController(isHabit: false)
+    private func irregularEventButtonDidTap() {
+        switchToTrackerCreationSetupViewController(isHabit: false)
     }
 }

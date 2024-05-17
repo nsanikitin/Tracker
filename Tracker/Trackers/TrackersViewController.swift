@@ -26,7 +26,9 @@ final class TrackersViewController: UIViewController {
     private var currentCategories = [TrackerCategory]()
     private var categories: [TrackerCategory] = []
     private var completedTrackers: Set<TrackerRecord> = []
-    
+    private var irregularEvents: [TrackerCategory] = []
+    private var completedIrregularEvents: Set<TrackerRecord> = []
+
     var currentDate: Date = Date()
     
     // MARK: - Lifecycle
@@ -49,11 +51,7 @@ final class TrackersViewController: UIViewController {
         var newTrackerCategories = categories.map { getTrackerCategoryAtWeekDay(for: $0) }
         newTrackerCategories.removeAll { $0.trackers.isEmpty }
         
-        if newTrackerCategories.isEmpty {
-            showStubs()
-        } else {
-            hideStubs()
-        }
+        newTrackerCategories.isEmpty ? showStubs() : hideStubs()
         
         currentCategories = newTrackerCategories
         trackersCollectionView.reloadData()
@@ -111,7 +109,7 @@ final class TrackersViewController: UIViewController {
             image: UIImage(systemName: "plus")?.applyingSymbolConfiguration(.init(pointSize: 18, weight: .semibold)),
             style: .plain,
             target: self,
-            action: #selector(addTrackButtonDidTape)
+            action: #selector(addTrackButtonDidTap)
         )
         addTrackButton.tintColor = .ypBlack
         self.navigationItem.leftBarButtonItem = addTrackButton
@@ -131,16 +129,15 @@ final class TrackersViewController: UIViewController {
     }
     
     private func setupTrackImageStub() {
-        guard let trackStubImage = UIImage(named: "stub") else { return }
-        trackStubImageView = UIImageView(image: trackStubImage)
+        trackStubImageView.image = UIImage(named: "stub")
         trackStubImageView.isHidden = false
         
         trackStubImageView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(trackStubImageView)
         
         NSLayoutConstraint.activate([
-            trackStubImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            trackStubImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            trackStubImageView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            trackStubImageView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor)
         ])
     }
     
@@ -179,7 +176,7 @@ final class TrackersViewController: UIViewController {
     // MARK: - Actions
     
     @objc
-    private func addTrackButtonDidTape() {
+    private func addTrackButtonDidTap() {
         let vc = TrackerCreationViewController()
         let navigationController = UINavigationController(rootViewController: vc)
         vc.originalVC = self
@@ -214,10 +211,10 @@ extension TrackersViewController: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
         
-        let currentTracker = currentCategories[indexPath.section].trackers[indexPath.row]
         cell.delegate = self
-        cell.trackerCurrentDate = currentDate
+        cell.trackerSelectedDate = currentDate
         
+        let currentTracker = currentCategories[indexPath.section].trackers[indexPath.row]
         let isTrackerCompleted = completedTrackers.contains { tracker in
             if tracker.id == currentTracker.id && Calendar.current.isDate(tracker.date, inSameDayAs: currentDate) {
                 return true
@@ -249,7 +246,9 @@ extension TrackersViewController: UICollectionViewDataSource {
 extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: (collectionView.bounds.width - 9) / 2, height: 148)
+        return CGSize(
+            width: (collectionView.bounds.width - ViewConfigurationConstants.collectionViewDistanceBetweenSectionsForTracker) / ViewConfigurationConstants.collectionViewSectionQuantityForTracker,
+            height: ViewConfigurationConstants.collectionViewTrackerSectionHeight)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
@@ -259,6 +258,7 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         let indexPath = IndexPath(row: 0, section: section)
         let headerView = self.collectionView(collectionView, viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader, at: indexPath)
+        
         return headerView.systemLayoutSizeFitting(CGSize(width: collectionView.frame.width,
                                                          height: UIView.layoutFittingExpandedSize.height),
                                                   withHorizontalFittingPriority: .required,
@@ -270,23 +270,29 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 
 extension TrackersViewController: TrackerCreationSetupViewControllerDelegate {
     
-    func updateTrackerCategory(for trackerCategory: TrackerCategory) {
-        guard !categories.isEmpty else {
+    func updateTrackerCategory(for trackerCategory: TrackerCategory, isHabit: Bool) {
+        if !categories.contains(where: { $0.title == trackerCategory.title }) {
             categories.append(trackerCategory)
-            return
-        }
-        
-        for category in categories {
-            if trackerCategory.title == category.title {
-                let newTrackers = category.trackers + trackerCategory.trackers
-                categories.append(TrackerCategory(title: category.title, trackers: newTrackers))
-                break
-            } else {
-                categories.append(trackerCategory)
-                break
+        } else {
+            guard let categoryIndex = categories.firstIndex(where: { $0.title == trackerCategory.title }) else {
+                assertionFailure("No Category Index")
+                return
             }
+            let oldTrackers = categories[categoryIndex].trackers
+            let newTrackers = oldTrackers + trackerCategory.trackers
+            let newCategory = TrackerCategory(title: trackerCategory.title, trackers: newTrackers)
+            categories[categoryIndex] = newCategory
         }
         
+        if categories.isEmpty {
+            categories.append(trackerCategory)
+        }
+        
+        if !isHabit {
+            irregularEvents.append(trackerCategory)
+        }
+        
+        setupCollectionView()
         getCurrentVisibleCategories()
     }
 }
@@ -299,8 +305,11 @@ extension TrackersViewController: TrackerCellViewDelegate {
         let trackerRecord = TrackerRecord(id: trackerID, date: currentDate)
         completedTrackers.insert(trackerRecord)
         
-        let trackerSetup = TrackerCreationSetupViewController()
-        if trackerSetup.isHabit == false {
+        if irregularEvents.contains(
+            where: { $0.trackers.contains(
+                where: { $0.id == trackerID })
+            }) {
+            completedIrregularEvents.insert(trackerRecord)
             removeTrackerFromCategory(for: trackerID)
         }
     }

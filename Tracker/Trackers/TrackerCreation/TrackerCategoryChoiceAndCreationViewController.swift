@@ -4,8 +4,8 @@ final class TrackerCategoryChoiceAndCreationViewController: UIViewController {
     
     // MARK: - Properties
     
-    private let addCategoryButton = UIButton()
-    private let categoryStubLabel = UILabel()
+    private lazy var addCategoryButton = UIButton()
+    private lazy var categoryStubLabel = UILabel()
     
     private lazy var categoryStubImageView = UIView()
     
@@ -38,7 +38,7 @@ final class TrackerCategoryChoiceAndCreationViewController: UIViewController {
         addCategoryButton.backgroundColor = .ypBlack
         
         addCategoryButton.isEnabled = true
-        addCategoryButton.addTarget(self, action: #selector(addCategoryButtonDidTape), for: .touchUpInside)
+        addCategoryButton.addTarget(self, action: #selector(addCategoryButtonDidTap), for: .touchUpInside)
         
         addCategoryButton.layer.masksToBounds = true
         addCategoryButton.layer.cornerRadius = ViewConfigurationConstants.elementsCornerRadius
@@ -85,7 +85,7 @@ final class TrackerCategoryChoiceAndCreationViewController: UIViewController {
     // MARK: - Actions
     
     @objc
-    private func addCategoryButtonDidTape() {
+    private func addCategoryButtonDidTap() {
         // TODO: - Add action to addCategoryButton
     }
 }

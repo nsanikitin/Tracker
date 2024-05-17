@@ -12,15 +12,14 @@ final class TrackerCellView: UICollectionViewCell {
     
     static let identifier = "cell"
     
-    private let emojiLabel = UILabel()
-    private let nameLabel = UILabel()
-    private let daysCounterLabel = UILabel()
-    private let completeTrackButton = UIButton()
-    private let trackColorView = UIView()
-    private let TrackersVC = TrackersViewController()
-    
+    private lazy var emojiLabel = UILabel()
+    private lazy var nameLabel = UILabel()
+    private lazy var daysCounterLabel = UILabel()
+    private lazy var completeTrackButton = UIButton()
+    private lazy var trackColorView = UIView()
     private lazy var trackerID = UUID()
     
+    lazy var trackerSelectedDate = Date()
     lazy var trackerCurrentDate = Date()
     lazy var completedDaysCounter: Int = 0
     lazy var isTrackerCompleted: Bool = false
@@ -134,7 +133,7 @@ final class TrackerCellView: UICollectionViewCell {
         completeTrackButton.tintColor = .ypWhite
         setupCompletedTrack()
         
-        completeTrackButton.addTarget(self, action: #selector(completeTrackButtonDidTape), for: .touchUpInside)
+        completeTrackButton.addTarget(self, action: #selector(completeTrackButtonDidTap), for: .touchUpInside)
         
         completeTrackButton.translatesAutoresizingMaskIntoConstraints = false
         addSubview(completeTrackButton)
@@ -153,8 +152,8 @@ final class TrackerCellView: UICollectionViewCell {
     // MARK: - Actions
     
     @objc
-    private func completeTrackButtonDidTape() {
-        if trackerCurrentDate >= TrackersVC.currentDate { return }
+    private func completeTrackButtonDidTap() {
+        if trackerCurrentDate <= trackerSelectedDate { return }
         
         if isTrackerCompleted {
             completedDaysCounter -= 1

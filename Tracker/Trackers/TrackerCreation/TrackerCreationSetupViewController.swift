@@ -2,16 +2,16 @@ import UIKit
 
 protocol TrackerCreationSetupViewControllerDelegate: AnyObject {
     
-    func updateTrackerCategory(for trackerCategory: TrackerCategory)
+    func updateTrackerCategory(for trackerCategory: TrackerCategory, isHabit: Bool)
 }
 
 final class TrackerCreationSetupViewController: UIViewController {
     
     // MARK: - Properties
     
-    private let createTrackerButton = UIButton()
-    private let cancelButton = UIButton()
-    private let trackerNameTextField = UITextField()
+    private lazy var createTrackerButton = UIButton()
+    private lazy var cancelButton = UIButton()
+    private lazy var trackerNameTextField = UITextField()
     
     private var trackerCategoryAndScheduleTableView = UITableView()
     private var newTrackerName: String?
@@ -37,7 +37,7 @@ final class TrackerCreationSetupViewController: UIViewController {
     
     // MARK: - Methods
     
-    private func switchToNextViewController(to vc: UIViewController) {
+    private func switchToCategoryOrScheduleViewController(to vc: UIViewController) {
         let navigationController = UINavigationController(rootViewController: vc)
         self.present(navigationController, animated: true)
     }
@@ -108,6 +108,7 @@ final class TrackerCreationSetupViewController: UIViewController {
         
         trackerCategoryAndScheduleTableView.backgroundColor = .ypBackground
         trackerCategoryAndScheduleTableView.rowHeight = ViewConfigurationConstants.tableViewRowHeight
+        trackerCategoryAndScheduleTableView.separatorInset =  UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         
         trackerCategoryAndScheduleTableView.layer.masksToBounds = true
         trackerCategoryAndScheduleTableView.layer.cornerRadius = ViewConfigurationConstants.elementsCornerRadius
@@ -119,7 +120,7 @@ final class TrackerCreationSetupViewController: UIViewController {
             trackerCategoryAndScheduleTableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             trackerCategoryAndScheduleTableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             trackerCategoryAndScheduleTableView.topAnchor.constraint(equalTo: trackerNameTextField.bottomAnchor, constant: 24),
-            trackerCategoryAndScheduleTableView.heightAnchor.constraint(equalToConstant: isHabit ? ViewConfigurationConstants.tableViewRowHeight * 2 : ViewConfigurationConstants.tableViewRowHeight)
+            trackerCategoryAndScheduleTableView.heightAnchor.constraint(equalToConstant: isHabit ? ViewConfigurationConstants.tableViewRowHeight * 2 - 1 : ViewConfigurationConstants.tableViewRowHeight - 1)
         ])
     }
     
@@ -130,7 +131,7 @@ final class TrackerCreationSetupViewController: UIViewController {
         createTrackerButton.backgroundColor = .ypGray
         
         createTrackerButton.isEnabled = false
-        createTrackerButton.addTarget(self, action: #selector(createTrackerButtonDidTape), for: .touchUpInside)
+        createTrackerButton.addTarget(self, action: #selector(createTrackerButtonDidTap), for: .touchUpInside)
         
         createTrackerButton.layer.masksToBounds = true
         createTrackerButton.layer.cornerRadius = ViewConfigurationConstants.elementsCornerRadius
@@ -174,7 +175,7 @@ final class TrackerCreationSetupViewController: UIViewController {
     // MARK: - Actions
     
     @objc
-    private func createTrackerButtonDidTape() {
+    private func createTrackerButtonDidTap() {
         guard let newTrackerName = newTrackerName
         else {
             assertionFailure("Tracker name is nil")
@@ -196,7 +197,7 @@ final class TrackerCreationSetupViewController: UIViewController {
         // TODO: - Add emoji and color transfer
         let updatingTrackerCategory = TrackerCategory(title: "По умолчанию",
                                                       trackers: [newTracker])
-        delegate?.updateTrackerCategory(for: updatingTrackerCategory)
+        delegate?.updateTrackerCategory(for: updatingTrackerCategory, isHabit: isHabit)
         self.dismiss(animated: true)
         previousVC?.dismiss(animated: true)
     }
@@ -243,7 +244,6 @@ extension TrackerCreationSetupViewController: UITableViewDataSource {
                 cell.detailTextLabel?.text = shortSchedule
             }
         }
-        cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
         
         return cell
     }
@@ -254,10 +254,10 @@ extension TrackerCreationSetupViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 0 {
             let vc = TrackerCategoryChoiceAndCreationViewController()
-            switchToNextViewController(to: vc)
+            switchToCategoryOrScheduleViewController(to: vc)
         } else {
             let vc = TrackerScheduleViewController()
-            switchToNextViewController(to: vc)
+            switchToCategoryOrScheduleViewController(to: vc)
             vc.delegate = self
         }
     }

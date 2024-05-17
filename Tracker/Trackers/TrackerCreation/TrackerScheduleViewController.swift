@@ -9,9 +9,9 @@ final class TrackerScheduleViewController: UIViewController {
 
     // MARK: - Properties
     
-    private let scheduleTableView = UITableView()
-    private let completeButton = UIButton()
-    private let weekDays = WeekDay.allCases
+    private lazy var scheduleTableView = UITableView()
+    private lazy var completeButton = UIButton()
+    private lazy var weekDays = WeekDay.allCases
     
     weak var delegate: ScheduleViewControllerDelegate?
     private var selectedWeekDays: [WeekDay] = []
@@ -65,7 +65,7 @@ final class TrackerScheduleViewController: UIViewController {
         completeButton.backgroundColor = .ypBlack
         
         completeButton.isEnabled = false
-        completeButton.addTarget(self, action: #selector(completeButtonDidTape), for: .touchUpInside)
+        completeButton.addTarget(self, action: #selector(completeButtonDidTap), for: .touchUpInside)
         
         completeButton.layer.masksToBounds = true
         completeButton.layer.cornerRadius = ViewConfigurationConstants.elementsCornerRadius
@@ -84,7 +84,7 @@ final class TrackerScheduleViewController: UIViewController {
     // MARK: - Actions
     
     @objc
-    private func completeButtonDidTape() {
+    private func completeButtonDidTap() {
         delegate?.saveTrackerSchedule(schedule: selectedWeekDays)
         self.dismiss(animated: true)
     }

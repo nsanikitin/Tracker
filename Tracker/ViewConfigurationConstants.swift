@@ -8,10 +8,16 @@ public enum ViewConfigurationConstants {
     static let buttonFontSize: CGFloat = 16
 
     static let elementsCornerRadius: CGFloat = 16
+    
     static let buttonBorderWight: CGFloat = 1
+
     static let buttonHeight: CGFloat = 60
     static let tableViewRowHeight: CGFloat = 75
     static let textFieldRowHeight: CGFloat = 75
+    static let collectionViewTrackerSectionHeight: CGFloat = 148
+    
+    static let collectionViewSectionQuantityForTracker: CGFloat = 2
+    static let collectionViewDistanceBetweenSectionsForTracker: CGFloat = 9
     
     static let trackerEmojies: [String] = [
         "🙂", "😻", "🌺", "🐶", "❤️", "😱",

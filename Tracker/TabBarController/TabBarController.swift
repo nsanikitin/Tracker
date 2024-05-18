@@ -12,11 +12,11 @@ final class TabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        configureTabBarAppearance()
-        configureTabBarItems()
+        setupTabBarAppearance()
+        setupTabBarItems()
     }
     
-    private func configureTabBarAppearance() {
+    private func setupTabBarAppearance() {
         if #available(iOS 15.0, *) {
             let appearance = UITabBarAppearance()
             appearance.backgroundColor = .ypWhite
@@ -24,22 +24,19 @@ final class TabBarController: UITabBarController {
         }
     }
     
-    private func configureTabBarItems() {
+    private func setupTabBarItems() {
         // Track Tab
-        trackersViewController.tabBarItem = UITabBarItem(
-            title: "Трекеры",
-            image: UIImage(named: "trackerTab"),
-            selectedImage: nil
-        )
+        trackersViewController.tabBarItem.title = "Трекеры"
+        trackersViewController.tabBarItem.image = UIImage(named: "trackerTab")
         
         // Statistic Tab
-        statisticViewController.tabBarItem = UITabBarItem(
-            title: "Статистика",
-            image: UIImage(named: "statisticTab"),
-            selectedImage: nil
-        )
+        statisticViewController.tabBarItem.title = "Статистика"
+        statisticViewController.tabBarItem.image = UIImage(named: "statisticTab")
         
         // Tab Items
-        viewControllers = [trackersViewController, statisticViewController]
+        viewControllers = [
+            UINavigationController(rootViewController: trackersViewController),
+            UINavigationController(rootViewController: statisticViewController)
+        ]
     }
 }

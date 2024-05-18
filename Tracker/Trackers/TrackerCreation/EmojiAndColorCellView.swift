@@ -1,5 +1,11 @@
 import UIKit
 
+protocol EmojiAndColorCellViewDelegate: AnyObject {
+    
+    func setEmojiToNewTracker(with emoji: String)
+    func setColorToNewTracker(with color: UIColor)
+}
+
 final class EmojiAndColorCellView: UICollectionViewCell {
     
     // MARK: - Properties
@@ -14,11 +20,15 @@ final class EmojiAndColorCellView: UICollectionViewCell {
     private lazy var colorView = UIView()
     private lazy var selectView = UIView()
     
+    weak var delegate: EmojiAndColorCellViewDelegate?
+    
     // MARK: - Methods
     
     func selectEmoji() {
         selectView.backgroundColor = .ypLightGray
         selectView.layer.cornerRadius = emojiCornerRadius
+        
+        delegate?.setEmojiToNewTracker(with: emojiLabel.text ?? "")
     }
     
     func deselectEmoji() {
@@ -30,6 +40,8 @@ final class EmojiAndColorCellView: UICollectionViewCell {
         selectView.layer.borderColor = colorView.backgroundColor?.withAlphaComponent(0.3).cgColor
         selectView.layer.cornerRadius = colorViewCornerRadius
         selectView.layer.borderWidth = colorViewBorderWight
+        
+        delegate?.setColorToNewTracker(with: colorView.backgroundColor ?? .clear)
     }
     
     func deselectColor() {

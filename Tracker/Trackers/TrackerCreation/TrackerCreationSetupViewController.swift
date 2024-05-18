@@ -59,6 +59,11 @@ final class TrackerCreationSetupViewController: UIViewController {
     }
     
     private func isTrackerDataReady() {
+        guard newTrackerEmoji != nil,
+              newTrackerColor != nil else {
+            return
+        }
+        
         if isHabit,
            newTrackerName != nil,
            !newTrackerSchedule.isEmpty {
@@ -69,7 +74,7 @@ final class TrackerCreationSetupViewController: UIViewController {
                 activateCreateTrackerButton()
             }
         }
-        // TODO: - Add checking emoji, color and category of tracker
+        // TODO: - Add checking category of tracker
         
         return
     }
@@ -193,7 +198,7 @@ final class TrackerCreationSetupViewController: UIViewController {
         emojisAndColorCollectionView.dataSource = self
         emojisAndColorCollectionView.delegate = self
         
-        emojisAndColorCollectionView.allowsMultipleSelection = false
+        emojisAndColorCollectionView.allowsMultipleSelection = true
         emojisAndColorCollectionView.backgroundColor = .clear
         
         emojisAndColorCollectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -223,15 +228,13 @@ final class TrackerCreationSetupViewController: UIViewController {
         
         let newTracker = Tracker(id: UUID(),
                                  name: newTrackerName,
-                                 color: .color1,
-                                 emoji: "🙂",
+                                 color: newTrackerColor ?? .clear,
+                                 emoji: newTrackerEmoji ?? "",
                                  schedule: newTrackerSchedule)
         
-        
-        
-        // TODO: - Add emoji and color transfer
         let updatingTrackerCategory = TrackerCategory(title: "По умолчанию",
                                                       trackers: [newTracker])
+        // TODO: - Add a category transfer
         delegate?.updateTrackerCategory(for: updatingTrackerCategory, isHabit: isHabit)
         self.dismiss(animated: true)
         previousVC?.dismiss(animated: true)
@@ -305,19 +308,19 @@ extension TrackerCreationSetupViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let cell = collectionView.cellForItem(at: indexPath) as? EmojiAndColorCellView else { return }
         
-        if indexPath.section == 0 {
+        switch indexPath.section {
+        case 0:
+            if newTrackerEmoji != nil {
+                cell.deselectEmoji()
+            }
             cell.selectEmoji()
-        } else {
+        case 1:
+            if newTrackerColor != nil {
+                cell.deselectColor()
+            }
             cell.selectColor()
-        }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        guard let cell = collectionView.cellForItem(at: indexPath) as? EmojiAndColorCellView else { return }
-        
-        if indexPath.section == 0 {
+        default:
             cell.deselectEmoji()
-        } else {
             cell.deselectColor()
         }
     }
@@ -341,7 +344,9 @@ extension TrackerCreationSetupViewController: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
         
-        indexPath.section == 0 ? 
+        cell.delegate = self
+        
+        indexPath.section == 0 ?
         cell.setupEmojiLabel(with: ViewConfigurationConstants.trackerEmojis[indexPath.row]) :
         cell.setupColorView(with: ViewConfigurationConstants.trackerColors[indexPath.row])
         
@@ -403,6 +408,21 @@ extension TrackerCreationSetupViewController: UITextFieldDelegate {
         return true
     }
 }
+
+// MARK: - EmojiAndColorCellViewDelegate Extension
+
+extension TrackerCreationSetupViewController: EmojiAndColorCellViewDelegate {
+    func setEmojiToNewTracker(with emoji: String) {
+        newTrackerEmoji = emoji
+        isTrackerDataReady()
+    }
+    
+    func setColorToNewTracker(with color: UIColor) {
+        newTrackerColor = color
+        isTrackerDataReady()
+    }
+}
+
 
 // MARK: - ScheduleViewControllerDelegate Extension
 

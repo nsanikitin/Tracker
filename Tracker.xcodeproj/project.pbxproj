@@ -11,6 +11,9 @@
 		4F26E09A2BF8CCDC00062FE0 /* EmojiAnColorHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F26E0992BF8CCDC00062FE0 /* EmojiAnColorHeaderView.swift */; };
 		4F26E09D2BF8EFD100062FE0 /* TrackerModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 4F26E09B2BF8EFD100062FE0 /* TrackerModel.xcdatamodeld */; };
 		4F26E0A02BF8F61100062FE0 /* NSPersistentContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F26E09F2BF8F61100062FE0 /* NSPersistentContainer.swift */; };
+		4F26E0A22BF8F99400062FE0 /* TrackerStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F26E0A12BF8F99400062FE0 /* TrackerStore.swift */; };
+		4F26E0A42BF8F9AD00062FE0 /* TrackerCategoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F26E0A32BF8F9AD00062FE0 /* TrackerCategoryStore.swift */; };
+		4F26E0A62BF8F9BF00062FE0 /* TrackerRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F26E0A52BF8F9BF00062FE0 /* TrackerRecordStore.swift */; };
 		4FB897342BBF276800D65F2E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB897332BBF276800D65F2E /* AppDelegate.swift */; };
 		4FB897362BBF276800D65F2E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB897352BBF276800D65F2E /* SceneDelegate.swift */; };
 		4FB897382BBF276800D65F2E /* TrackersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB897372BBF276800D65F2E /* TrackersViewController.swift */; };
@@ -36,6 +39,9 @@
 		4F26E0992BF8CCDC00062FE0 /* EmojiAnColorHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiAnColorHeaderView.swift; sourceTree = "<group>"; };
 		4F26E09C2BF8EFD100062FE0 /* TrackerModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = TrackerModel.xcdatamodel; sourceTree = "<group>"; };
 		4F26E09F2BF8F61100062FE0 /* NSPersistentContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSPersistentContainer.swift; sourceTree = "<group>"; };
+		4F26E0A12BF8F99400062FE0 /* TrackerStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerStore.swift; sourceTree = "<group>"; };
+		4F26E0A32BF8F9AD00062FE0 /* TrackerCategoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerCategoryStore.swift; sourceTree = "<group>"; };
+		4F26E0A52BF8F9BF00062FE0 /* TrackerRecordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerRecordStore.swift; sourceTree = "<group>"; };
 		4FB897302BBF276800D65F2E /* Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FB897332BBF276800D65F2E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4FB897352BBF276800D65F2E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -74,6 +80,9 @@
 			children = (
 				4F26E09B2BF8EFD100062FE0 /* TrackerModel.xcdatamodeld */,
 				4F26E09F2BF8F61100062FE0 /* NSPersistentContainer.swift */,
+				4F26E0A12BF8F99400062FE0 /* TrackerStore.swift */,
+				4F26E0A32BF8F9AD00062FE0 /* TrackerCategoryStore.swift */,
+				4F26E0A52BF8F9BF00062FE0 /* TrackerRecordStore.swift */,
 			);
 			path = CoreData;
 			sourceTree = "<group>";
@@ -236,6 +245,7 @@
 				4FC52AE62BE504020052B4CF /* WeekDay.swift in Sources */,
 				4FC52ACA2BDFFB700052B4CF /* Tracker.swift in Sources */,
 				4FC52ACE2BDFFDAF0052B4CF /* TrackerRecord.swift in Sources */,
+				4F26E0A62BF8F9BF00062FE0 /* TrackerRecordStore.swift in Sources */,
 				4FC52AE02BE2668A0052B4CF /* TrackerCategoryChoiceAndCreationViewController.swift in Sources */,
 				4FB897382BBF276800D65F2E /* TrackersViewController.swift in Sources */,
 				4FB897342BBF276800D65F2E /* AppDelegate.swift in Sources */,
@@ -247,6 +257,8 @@
 				4F26E0A02BF8F61100062FE0 /* NSPersistentContainer.swift in Sources */,
 				4FB8974D2BBF38BD00D65F2E /* TabBarController.swift in Sources */,
 				4FC52AD52BE044C00052B4CF /* TrackerCellView.swift in Sources */,
+				4F26E0A42BF8F9AD00062FE0 /* TrackerCategoryStore.swift in Sources */,
+				4F26E0A22BF8F99400062FE0 /* TrackerStore.swift in Sources */,
 				4FC52AD22BE026730052B4CF /* TrackerCreationSetupViewController.swift in Sources */,
 				4F26E0982BF8CCB700062FE0 /* EmojiAndColorCellView.swift in Sources */,
 				4FC52AD02BE005750052B4CF /* TrackerCreationViewController.swift in Sources */,

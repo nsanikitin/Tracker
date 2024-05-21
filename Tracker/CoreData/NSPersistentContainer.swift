@@ -3,6 +3,8 @@ import Foundation
 
 final class PersistentContainerCreator {
     
+    static let shared = PersistentContainerCreator()
+    
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "TrackerModel")
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
@@ -12,8 +14,6 @@ final class PersistentContainerCreator {
         })
         return container
     }()
-    
-    private init() {}
     
     func saveContext() {
         let context = persistentContainer.viewContext

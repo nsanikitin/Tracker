@@ -9,6 +9,9 @@ final class TrackerCreationSetupViewController: UIViewController {
     
     // MARK: - Properties
     
+    private let trackerStore = TrackerStore.shared
+    private let trackerCategoryStore = TrackerCategoryStore.shared
+    
     private lazy var createTrackerButton = UIButton()
     private lazy var cancelButton = UIButton()
     private lazy var trackerNameTextField = UITextField()
@@ -234,7 +237,9 @@ final class TrackerCreationSetupViewController: UIViewController {
         
         let updatingTrackerCategory = TrackerCategory(title: "По умолчанию",
                                                       trackers: [newTracker])
-        // TODO: - Add a category transfer
+        trackerCategoryStore.addTrackerCategoryToCoreData(categoryTitle: updatingTrackerCategory.title)
+        trackerStore.addTrackerToCoreData(for: newTracker, to: updatingTrackerCategory)
+        // TODO: - Add a category transfer and move the category store to the category creation screen
         delegate?.updateTrackerCategory(for: updatingTrackerCategory, isHabit: isHabit)
         self.dismiss(animated: true)
         previousVC?.dismiss(animated: true)
@@ -422,7 +427,6 @@ extension TrackerCreationSetupViewController: EmojiAndColorCellViewDelegate {
         isTrackerDataReady()
     }
 }
-
 
 // MARK: - ScheduleViewControllerDelegate Extension
 

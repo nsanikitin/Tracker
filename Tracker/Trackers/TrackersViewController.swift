@@ -4,6 +4,10 @@ final class TrackersViewController: UIViewController {
     
     // MARK: - Properties
     
+    private let trackerStore = TrackerStore.shared
+    private let trackerCategoryStore = TrackerCategoryStore.shared
+    private let trackerRecordStore = TrackerRecordStore.shared
+    
     private lazy var trackStubLabel: UILabel = UILabel()
     private lazy var trackStubImageView: UIImageView = UIImageView()
     private lazy var trackersCollectionView: UICollectionView = {
@@ -38,7 +42,9 @@ final class TrackersViewController: UIViewController {
         
         view.backgroundColor = .ypWhite
         
-        categories = CategoriesMock.shared.categories // categories mocks to check a trackers filter
+        trackerStore.delegate = self
+        categories = getCategories()
+        completedTrackers = getCompletedTrackers()
         getCurrentVisibleCategories()
         
         setupNavigationBar()
@@ -78,6 +84,20 @@ final class TrackersViewController: UIViewController {
             newCategories.append(TrackerCategory(title: category.title, trackers: newTrackers))
         }
         categories = newCategories
+    }
+    
+    private func getCategories() -> [TrackerCategory] {
+        let categoriesCoreData = trackerCategoryStore.trackerCategoriesCoreData
+        let categories = categoriesCoreData.compactMap { trackerCategoryStore.convertTrackerCategoryCoreDataToTrackerCategory(for: $0) }
+        
+        return categories
+    }
+    
+    private func getCompletedTrackers() -> Set<TrackerRecord> {
+        let trackersRecordCoreData = trackerRecordStore.trackersRecordCoreData
+        let trackersRecord = trackersRecordCoreData.compactMap { trackerRecordStore.convertTrackerRecordCoreDataToTrackerRecord(for: $0) }
+        completedTrackers = Set(trackersRecord)
+        return completedTrackers
     }
     
     private func showStubs() {
@@ -304,6 +324,7 @@ extension TrackersViewController: TrackerCellViewDelegate {
     func addCompletedTracker(for trackerID: UUID) {
         let trackerRecord = TrackerRecord(id: trackerID, date: currentDate)
         completedTrackers.insert(trackerRecord)
+        trackerRecordStore.addTrackerRecordToCoreData(for: trackerRecord)
         
         if irregularEvents.contains(
             where: { $0.trackers.contains(
@@ -311,11 +332,21 @@ extension TrackersViewController: TrackerCellViewDelegate {
             }) {
             completedIrregularEvents.insert(trackerRecord)
             removeTrackerFromCategory(for: trackerID)
+            trackerStore.deleteTrackerFromCoreData(for: trackerID)
         }
     }
     
     func removeCompletedTracker(for trackerID: UUID) {
         let trackerRemove = TrackerRecord(id: trackerID, date: currentDate)
         completedTrackers.remove(trackerRemove)
+        trackerRecordStore.deleteTrackerRecordFromCoreData(for: trackerRemove)
+    }
+}
+
+// MARK: - TrackerStoreDelegate Extension
+
+extension TrackersViewController: TrackerStoreDelegate {
+    func updateTrackers() {
+        getCurrentVisibleCategories()
     }
 }

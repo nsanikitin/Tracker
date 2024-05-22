@@ -27,7 +27,7 @@ final class TrackerRecordStore: NSObject {
         }
     }
     
-    init(context: NSManagedObjectContext) throws {
+    private init(context: NSManagedObjectContext) throws {
         self.context = context
         super.init()
         

@@ -315,19 +315,19 @@ extension TrackerCreationSetupViewController: UICollectionViewDelegate {
         
         switch indexPath.section {
         case 0:
-            if newTrackerEmoji != nil {
-                cell.deselectEmoji()
-            }
             cell.selectEmoji()
         case 1:
-            if newTrackerColor != nil {
-                cell.deselectColor()
-            }
             cell.selectColor()
         default:
-            cell.deselectEmoji()
-            cell.deselectColor()
+            return
         }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+        collectionView.indexPathsForSelectedItems?
+            .filter({ $0.section == indexPath.section })
+            .forEach({ collectionView.deselectItem(at: $0, animated: false) })
+        return true
     }
 }
 
@@ -417,6 +417,7 @@ extension TrackerCreationSetupViewController: UITextFieldDelegate {
 // MARK: - EmojiAndColorCellViewDelegate Extension
 
 extension TrackerCreationSetupViewController: EmojiAndColorCellViewDelegate {
+    
     func setEmojiToNewTracker(with emoji: String) {
         newTrackerEmoji = emoji
         isTrackerDataReady()

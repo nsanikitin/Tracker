@@ -11,7 +11,6 @@ final class TrackerStore: NSObject {
     // MARK: - Properties
     
     static let shared = TrackerStore()
-    private let uiColorMarshalling = UIColorMarshalling()
     private let context: NSManagedObjectContext
     
     private var fetchedResultsController: NSFetchedResultsController<TrackerCoreData>?
@@ -33,7 +32,7 @@ final class TrackerStore: NSObject {
         }
     }
     
-    init(context: NSManagedObjectContext) throws {
+    private init(context: NSManagedObjectContext) throws {
         self.context = context
         super.init()
         
@@ -60,7 +59,7 @@ final class TrackerStore: NSObject {
         trackerEntity.id = tracker.id
         trackerEntity.name = tracker.name
         trackerEntity.emoji = tracker.emoji
-        trackerEntity.color = uiColorMarshalling.hexString(from: tracker.color)
+        trackerEntity.color = UIColorMarshalling.hexString(from: tracker.color)
         trackerEntity.schedule = tracker.schedule as NSObject
         
         let categoriesFromCoreData = TrackerCategoryStore.shared.fetchTrackerCategoriesFromCoreData()
@@ -105,7 +104,7 @@ final class TrackerStore: NSObject {
         return Tracker(
             id: id,
             name: name,
-            color: uiColorMarshalling.color(from: color),
+            color: UIColorMarshalling.color(from: color),
             emoji: emoji,
             schedule: schedule as! [WeekDay]
         )

@@ -16,16 +16,59 @@ final class EmojiAndColorCellView: UICollectionViewCell {
     private let colorViewCornerRadius: CGFloat = 8
     private let colorViewBorderWight: CGFloat = 3
     
-    private lazy var emojiLabel = UILabel()
-    private lazy var colorView = UIView()
+    private lazy var emojiLabel = {
+        let emoji = UILabel()
+        emoji.font = UIFont.systemFont(ofSize: 32)
+        emoji.textAlignment = .center
+        emoji.backgroundColor = .clear
+        
+        emoji.translatesAutoresizingMaskIntoConstraints = false
+        selectView.addSubview(emoji)
+        
+        NSLayoutConstraint.activate([
+            emoji.heightAnchor.constraint(equalToConstant: 38),
+            emoji.widthAnchor.constraint(equalToConstant: 32),
+            emoji.centerXAnchor.constraint(equalTo: selectView.centerXAnchor),
+            emoji.centerYAnchor.constraint(equalTo: selectView.centerYAnchor)
+        ])
+        return emoji
+    }()
+    private lazy var colorView = {
+        let color = UIView()
+        color.layer.masksToBounds = true
+        color.layer.cornerRadius = colorViewCornerRadius
+        
+        color.translatesAutoresizingMaskIntoConstraints = false
+        selectView.addSubview(color)
+        
+        NSLayoutConstraint.activate([
+            color.heightAnchor.constraint(equalToConstant: 40),
+            color.widthAnchor.constraint(equalToConstant: 40),
+            color.centerXAnchor.constraint(equalTo: selectView.centerXAnchor),
+            color.centerYAnchor.constraint(equalTo: selectView.centerYAnchor)
+        ])
+        return color
+    }()
     private lazy var selectView = UIView()
     
     weak var delegate: EmojiAndColorCellViewDelegate?
+    
+    override var isSelected: Bool {
+        didSet {
+            if !emojiLabel.isHidden {
+                isSelected ? selectEmoji() : deselectEmoji()
+            }
+            if !colorView.isHidden {
+                isSelected ? selectColor() : deselectColor()
+            }
+        }
+    }
     
     // MARK: - Methods
     
     func selectEmoji() {
         selectView.backgroundColor = .ypLightGray
+        selectView.layer.borderWidth = .zero
         selectView.layer.cornerRadius = emojiCornerRadius
         
         delegate?.setEmojiToNewTracker(with: emojiLabel.text ?? "")
@@ -37,6 +80,7 @@ final class EmojiAndColorCellView: UICollectionViewCell {
     }
     
     func selectColor() {
+        selectView.backgroundColor = .clear
         selectView.layer.borderColor = colorView.backgroundColor?.withAlphaComponent(0.3).cgColor
         selectView.layer.cornerRadius = colorViewCornerRadius
         selectView.layer.borderWidth = colorViewBorderWight
@@ -68,35 +112,9 @@ final class EmojiAndColorCellView: UICollectionViewCell {
     
     func setupEmojiLabel(with emoji: String) {
         emojiLabel.text = emoji
-        emojiLabel.font = UIFont.systemFont(ofSize: 32)
-        emojiLabel.textAlignment = .center
-        emojiLabel.backgroundColor = .clear
-        
-        emojiLabel.translatesAutoresizingMaskIntoConstraints = false
-        selectView.addSubview(emojiLabel)
-        
-        NSLayoutConstraint.activate([
-            emojiLabel.heightAnchor.constraint(equalToConstant: 38),
-            emojiLabel.widthAnchor.constraint(equalToConstant: 32),
-            emojiLabel.centerXAnchor.constraint(equalTo: selectView.centerXAnchor),
-            emojiLabel.centerYAnchor.constraint(equalTo: selectView.centerYAnchor)
-        ])
     }
     
     func setupColorView(with color: UIColor) {
         colorView.backgroundColor = color
-        
-        colorView.layer.masksToBounds = true
-        colorView.layer.cornerRadius = colorViewCornerRadius
-        
-        colorView.translatesAutoresizingMaskIntoConstraints = false
-        selectView.addSubview(colorView)
-        
-        NSLayoutConstraint.activate([
-            colorView.heightAnchor.constraint(equalToConstant: 40),
-            colorView.widthAnchor.constraint(equalToConstant: 40),
-            colorView.centerXAnchor.constraint(equalTo: selectView.centerXAnchor),
-            colorView.centerYAnchor.constraint(equalTo: selectView.centerYAnchor)
-        ])
     }
 }

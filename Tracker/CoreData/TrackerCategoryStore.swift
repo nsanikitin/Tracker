@@ -32,7 +32,7 @@ final class TrackerCategoryStore: NSObject {
         }
     }
     
-    init(context: NSManagedObjectContext) throws {
+    private init(context: NSManagedObjectContext) throws {
         self.context = context
         super.init()
         

@@ -56,10 +56,10 @@ final class EmojiAndColorCellView: UICollectionViewCell {
     override var isSelected: Bool {
         didSet {
             if !emojiLabel.isHidden {
-                isSelected ? selectEmoji() : deselectEmoji()
+                isSelected ? deselectEmoji() : selectEmoji()
             }
             if !colorView.isHidden {
-                isSelected ? selectColor() : deselectColor()
+                isSelected ? deselectColor() : selectColor()
             }
         }
     }

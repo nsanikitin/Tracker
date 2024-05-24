@@ -16,6 +16,8 @@
 		4F26E0A62BF8F9BF00062FE0 /* TrackerRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F26E0A52BF8F9BF00062FE0 /* TrackerRecordStore.swift */; };
 		4F26E0A82BFB9B1F00062FE0 /* UIColorMarshalling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F26E0A72BFB9B1F00062FE0 /* UIColorMarshalling.swift */; };
 		4F26E0AC2BFBD47800062FE0 /* DaysValueTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F26E0AB2BFBD47800062FE0 /* DaysValueTransformer.swift */; };
+		4F3C6BC72C00783B0026CA64 /* OnboardingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F3C6BC62C00783B0026CA64 /* OnboardingViewController.swift */; };
+		4F3C6BC92C007F010026CA64 /* OnboardingPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F3C6BC82C007F010026CA64 /* OnboardingPageViewController.swift */; };
 		4FB897342BBF276800D65F2E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB897332BBF276800D65F2E /* AppDelegate.swift */; };
 		4FB897362BBF276800D65F2E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB897352BBF276800D65F2E /* SceneDelegate.swift */; };
 		4FB897382BBF276800D65F2E /* TrackersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB897372BBF276800D65F2E /* TrackersViewController.swift */; };
@@ -46,6 +48,8 @@
 		4F26E0A52BF8F9BF00062FE0 /* TrackerRecordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerRecordStore.swift; sourceTree = "<group>"; };
 		4F26E0A72BFB9B1F00062FE0 /* UIColorMarshalling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorMarshalling.swift; sourceTree = "<group>"; };
 		4F26E0AB2BFBD47800062FE0 /* DaysValueTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaysValueTransformer.swift; sourceTree = "<group>"; };
+		4F3C6BC62C00783B0026CA64 /* OnboardingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewController.swift; sourceTree = "<group>"; };
+		4F3C6BC82C007F010026CA64 /* OnboardingPageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingPageViewController.swift; sourceTree = "<group>"; };
 		4FB897302BBF276800D65F2E /* Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FB897332BBF276800D65F2E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4FB897352BBF276800D65F2E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -93,6 +97,15 @@
 			path = CoreData;
 			sourceTree = "<group>";
 		};
+		4F3C6BC52C0077B00026CA64 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				4F3C6BC62C00783B0026CA64 /* OnboardingViewController.swift */,
+				4F3C6BC82C007F010026CA64 /* OnboardingPageViewController.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
 		4FB897272BBF276800D65F2E = {
 			isa = PBXGroup;
 			children = (
@@ -114,6 +127,7 @@
 			children = (
 				4FB897332BBF276800D65F2E /* AppDelegate.swift */,
 				4FB897352BBF276800D65F2E /* SceneDelegate.swift */,
+				4F3C6BC52C0077B00026CA64 /* Onboarding */,
 				4FB897492BBF381D00D65F2E /* TabBarController */,
 				4FB897472BBF373200D65F2E /* Trackers */,
 				4FB897482BBF374500D65F2E /* Statistic */,
@@ -271,7 +285,9 @@
 				4F26E0982BF8CCB700062FE0 /* EmojiAndColorCellView.swift in Sources */,
 				4FC52AD02BE005750052B4CF /* TrackerCreationViewController.swift in Sources */,
 				4F26E09A2BF8CCDC00062FE0 /* EmojiAndColorHeaderView.swift in Sources */,
+				4F3C6BC72C00783B0026CA64 /* OnboardingViewController.swift in Sources */,
 				4FB8974B2BBF383F00D65F2E /* StatisticViewController.swift in Sources */,
+				4F3C6BC92C007F010026CA64 /* OnboardingPageViewController.swift in Sources */,
 				4FC52ACC2BDFFCF50052B4CF /* TrackerCategory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

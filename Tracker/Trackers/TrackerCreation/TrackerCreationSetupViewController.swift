@@ -9,9 +9,28 @@ final class TrackerCreationSetupViewController: UIViewController {
     
     // MARK: - Properties
     
+    private let trackerStore = TrackerStore.shared
+    private let trackerCategoryStore = TrackerCategoryStore.shared
+    
     private lazy var createTrackerButton = UIButton()
     private lazy var cancelButton = UIButton()
     private lazy var trackerNameTextField = UITextField()
+    private lazy var emojisAndColorCollectionView: UICollectionView = {
+        let collectionView = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: UICollectionViewFlowLayout()
+        )
+        collectionView.register(
+            EmojiAndColorCellView.self,
+            forCellWithReuseIdentifier: EmojiAndColorCellView.identifier
+        )
+        collectionView.register(
+            EmojiAndColorHeader.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: EmojiAndColorHeader.identifier
+        )
+        return collectionView
+    }()
     
     private var trackerCategoryAndScheduleTableView = UITableView()
     private var newTrackerName: String?
@@ -43,6 +62,11 @@ final class TrackerCreationSetupViewController: UIViewController {
     }
     
     private func isTrackerDataReady() {
+        guard newTrackerEmoji != nil,
+              newTrackerColor != nil else {
+            return
+        }
+        
         if isHabit,
            newTrackerName != nil,
            !newTrackerSchedule.isEmpty {
@@ -53,7 +77,7 @@ final class TrackerCreationSetupViewController: UIViewController {
                 activateCreateTrackerButton()
             }
         }
-        // TODO: - Add checking emoji, color and category of tracker
+        // TODO: - Add checking category of tracker
         
         return
     }
@@ -74,6 +98,7 @@ final class TrackerCreationSetupViewController: UIViewController {
         setupTableView()
         setupCreateTrackerButton()
         setupCancelButton()
+        setupEmojisAndColorsCollectionView()
     }
     
     private func setupTrackerNameTextField() {
@@ -172,6 +197,24 @@ final class TrackerCreationSetupViewController: UIViewController {
         ])
     }
     
+    private func setupEmojisAndColorsCollectionView() {
+        emojisAndColorCollectionView.dataSource = self
+        emojisAndColorCollectionView.delegate = self
+        
+        emojisAndColorCollectionView.allowsMultipleSelection = true
+        emojisAndColorCollectionView.backgroundColor = .clear
+        
+        emojisAndColorCollectionView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(emojisAndColorCollectionView)
+        
+        NSLayoutConstraint.activate([
+            emojisAndColorCollectionView.topAnchor.constraint(equalTo: trackerCategoryAndScheduleTableView.bottomAnchor, constant: 32),
+            emojisAndColorCollectionView.bottomAnchor.constraint(equalTo: cancelButton.topAnchor, constant: -16),
+            emojisAndColorCollectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            emojisAndColorCollectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
+        ])
+    }
+    
     // MARK: - Actions
     
     @objc
@@ -188,15 +231,15 @@ final class TrackerCreationSetupViewController: UIViewController {
         
         let newTracker = Tracker(id: UUID(),
                                  name: newTrackerName,
-                                 color: .color1,
-                                 emoji: "🙂",
+                                 color: newTrackerColor ?? .clear,
+                                 emoji: newTrackerEmoji ?? "",
                                  schedule: newTrackerSchedule)
         
-        
-        
-        // TODO: - Add emoji and color transfer
         let updatingTrackerCategory = TrackerCategory(title: "По умолчанию",
                                                       trackers: [newTracker])
+        trackerCategoryStore.addTrackerCategoryToCoreData(categoryTitle: updatingTrackerCategory.title)
+        trackerStore.addTrackerToCoreData(for: newTracker, to: updatingTrackerCategory)
+        // TODO: - Add a category transfer and move the category store to the category creation screen
         delegate?.updateTrackerCategory(for: updatingTrackerCategory, isHabit: isHabit)
         self.dismiss(animated: true)
         previousVC?.dismiss(animated: true)
@@ -263,6 +306,97 @@ extension TrackerCreationSetupViewController: UITableViewDelegate {
     }
 }
 
+// MARK: - Collection View Extensions
+
+extension TrackerCreationSetupViewController: UICollectionViewDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at: indexPath) as? EmojiAndColorCellView else { return }
+        
+        switch indexPath.section {
+        case 0:
+            cell.selectEmoji()
+        case 1:
+            cell.selectColor()
+        default:
+            return
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+        collectionView.indexPathsForSelectedItems?
+            .filter({ $0.section == indexPath.section })
+            .forEach({ collectionView.deselectItem(at: $0, animated: false) })
+        return true
+    }
+}
+
+extension TrackerCreationSetupViewController: UICollectionViewDataSource {
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 2
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return ViewConfigurationConstants.trackerEmojis.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: EmojiAndColorCellView.identifier,
+            for: indexPath
+        ) as? EmojiAndColorCellView else {
+            return UICollectionViewCell()
+        }
+        
+        cell.delegate = self
+        
+        indexPath.section == 0 ?
+        cell.setupEmojiLabel(with: ViewConfigurationConstants.trackerEmojis[indexPath.row]) :
+        cell.setupColorView(with: ViewConfigurationConstants.trackerColors[indexPath.row])
+        
+        cell.setupSelectView()
+        
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        guard let header = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            withReuseIdentifier: EmojiAndColorHeader.identifier,
+            for: indexPath
+        ) as? EmojiAndColorHeader else {
+            return UICollectionReusableView()
+        }
+        header.titleLabel.text = indexPath.section == 0 ? "Emoji" : "Цвет"
+        
+        return header
+    }
+}
+
+extension TrackerCreationSetupViewController: UICollectionViewDelegateFlowLayout {
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(
+            width: (collectionView.bounds.width - ViewConfigurationConstants.collectionViewDistanceBetweenSectionsForEmojiAndColor) / ViewConfigurationConstants.collectionViewSectionQuantityForEmojiAndColor,
+            height: ViewConfigurationConstants.collectionViewEmojiAndColorHeight)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        let indexPath = IndexPath(row: 0, section: section)
+        let headerView = self.collectionView(collectionView, viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader, at: indexPath)
+        
+        return headerView.systemLayoutSizeFitting(CGSize(width: collectionView.frame.width,
+                                                         height: UIView.layoutFittingExpandedSize.height),
+                                                  withHorizontalFittingPriority: .required,
+                                                  verticalFittingPriority: .fittingSizeLevel)
+    }
+}
+
 // MARK: - TextField Extension
 
 extension TrackerCreationSetupViewController: UITextFieldDelegate {
@@ -277,6 +411,21 @@ extension TrackerCreationSetupViewController: UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         return true
+    }
+}
+
+// MARK: - EmojiAndColorCellViewDelegate Extension
+
+extension TrackerCreationSetupViewController: EmojiAndColorCellViewDelegate {
+    
+    func setEmojiToNewTracker(with emoji: String) {
+        newTrackerEmoji = emoji
+        isTrackerDataReady()
+    }
+    
+    func setColorToNewTracker(with color: UIColor) {
+        newTrackerColor = color
+        isTrackerDataReady()
     }
 }
 

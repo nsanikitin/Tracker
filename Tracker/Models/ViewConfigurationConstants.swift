@@ -15,11 +15,14 @@ public enum ViewConfigurationConstants {
     static let tableViewRowHeight: CGFloat = 75
     static let textFieldRowHeight: CGFloat = 75
     static let collectionViewTrackerSectionHeight: CGFloat = 148
+    static let collectionViewEmojiAndColorHeight: CGFloat = 52
     
     static let collectionViewSectionQuantityForTracker: CGFloat = 2
     static let collectionViewDistanceBetweenSectionsForTracker: CGFloat = 9
+    static let collectionViewSectionQuantityForEmojiAndColor: CGFloat = 6
+    static let collectionViewDistanceBetweenSectionsForEmojiAndColor: CGFloat = 5
     
-    static let trackerEmojies: [String] = [
+    static let trackerEmojis: [String] = [
         "🙂", "😻", "🌺", "🐶", "❤️", "😱",
         "😇", "😡", "🥶", "🤔", "🙌", "🍔",
         "🥦", "🏓", "🥇", "🎸", "🏝", "😪"

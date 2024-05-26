@@ -4,14 +4,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
     
+    private func switchToTabBar() {
+        window?.rootViewController = TabBarController()
+    }
+    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
         
-        if UserDefaults.standard.string(forKey: "onboarding") == "onboardingIsCompleted" {
-            window?.rootViewController = TabBarController()
+        if UserDefaultsStorage().onboardingIsCompleted ?? false {
+            switchToTabBar()
         } else {
-            window?.rootViewController = OnboardingViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
+            let onboardingVC = OnboardingViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
+            window?.rootViewController = onboardingVC
+            onboardingVC.onboardingIsFinished = switchToTabBar
         }
         
         window?.makeKeyAndVisible()

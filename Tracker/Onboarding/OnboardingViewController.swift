@@ -4,6 +4,7 @@ final class OnboardingViewController: UIPageViewController {
     
     // MARK: - Properties
     
+    private lazy var userDefaultsStorage = UserDefaultsStorage()
     private lazy var exitButton = {
         let button = UIButton()
         button.backgroundColor = .ypBlack
@@ -37,6 +38,8 @@ final class OnboardingViewController: UIPageViewController {
         
         return pageControl
     }()
+    
+    var onboardingIsFinished: (() -> Void)?
     
     // MARK: - Lifecycle
     
@@ -82,12 +85,10 @@ final class OnboardingViewController: UIPageViewController {
     
     @objc
     private func exitButtonDidTap() {
-        UserDefaults.standard.set("onboardingIsCompleted", forKey: "onboarding")
-        let TabBarController = TabBarController()
-        TabBarController.modalPresentationStyle = .fullScreen
-        present(TabBarController, animated: false)
+        userDefaultsStorage.onboardingIsCompleted = true
+        onboardingIsFinished?()
+        self.dismiss(animated: true)
     }
-
 }
 
 // MARK: - PageViewController Extensions

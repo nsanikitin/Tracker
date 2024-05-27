@@ -17,12 +17,17 @@ final class OnboardingViewController: UIPageViewController {
         return button
     }()
     private lazy var pages: [UIViewController] = {
+        guard let blueImage = UIImage(named: "onboardingScreenPage1"),
+              let redImage = UIImage(named: "onboardingScreenPage2") else {
+            assertionFailure("Images for pages is not exist!")
+            return []
+        }
         let bluePage = OnboardingPageViewController(
-            screenImage: UIImage(named: "onboardingScreenPage1"),
+            screenImage: blueImage,
             labelText: "Отслеживайте только то, что хотите"
         )
         let redPage = OnboardingPageViewController(
-            screenImage: UIImage(named: "onboardingScreenPage2"),
+            screenImage: redImage,
             labelText: "Даже если это не литры воды и йога"
         )
         

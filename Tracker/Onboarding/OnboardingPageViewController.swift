@@ -1,11 +1,11 @@
 import UIKit
 
-class OnboardingPageViewController: UIViewController {
+final class OnboardingPageViewController: UIViewController {
     
     // MARK: - Properties
     
-    private var screenImage: UIImage?
-    private var labelText: String?
+    private var screenImage: UIImage
+    private var labelText: String
     
     private lazy var imageView = UIImageView()
     private lazy var label = {
@@ -20,10 +20,10 @@ class OnboardingPageViewController: UIViewController {
     
     // MARK: - Init
     
-    init(screenImage: UIImage?, labelText: String?) {
-        super.init(nibName: nil, bundle: nil)
+    init(screenImage: UIImage, labelText: String) {
         self.screenImage = screenImage
         self.labelText = labelText
+        super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
@@ -35,11 +35,6 @@ class OnboardingPageViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        guard let screenImage = screenImage,
-              let labelText = labelText else {
-            assertionFailure("Invalid data for view controller")
-            return
-        }
         setupImage(with: screenImage)
         setupLabel(with: labelText)
     }

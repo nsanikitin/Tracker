@@ -1,11 +1,6 @@
 import CoreData
 import Foundation
 
-protocol TrackerCategoryStoreDelegate: AnyObject {
-    
-    func updateCategories()
-}
-
 final class TrackerCategoryStore: NSObject {
     
     // MARK: - Properties
@@ -14,7 +9,6 @@ final class TrackerCategoryStore: NSObject {
     private let context: NSManagedObjectContext
     
     private var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCoreData>?
-    weak var delegate: TrackerCategoryStoreDelegate?
     var trackerCategoriesCoreData: [TrackerCategoryCoreData] {
         guard let objects = self.fetchedResultsController?.fetchedObjects else { return [] }
         return objects
@@ -46,7 +40,6 @@ final class TrackerCategoryStore: NSObject {
             sectionNameKeyPath: nil,
             cacheName: nil
         )
-        controller.delegate = self
         self.fetchedResultsController = controller
         try controller.performFetch()
     }
@@ -97,12 +90,5 @@ final class TrackerCategoryStore: NSObject {
                 return TrackerStore.shared.convertTrackerCoreDataToTracker(for: trackerCoreData)
             }
         )
-    }
-}
-
-extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
-    
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<any NSFetchRequestResult>) {
-        // TODO: - Add action with delegate after creation of categories screen
     }
 }

@@ -10,7 +10,7 @@ final class TrackerCreationSetupViewController: UIViewController {
     // MARK: - Properties
     
     private let trackerStore = TrackerStore.shared
-    private let trackerCategoryStore = TrackerCategoryStore.shared
+    private let categoryViewModel = CategoryViewModel()
     
     private lazy var createTrackerButton = UIButton()
     private lazy var cancelButton = UIButton()
@@ -38,6 +38,7 @@ final class TrackerCreationSetupViewController: UIViewController {
     private var newTrackerEmoji: String?
     private var newTrackerColor: UIColor?
     private var shortSchedule: String = ""
+    private var selectedCategoryCoreData: TrackerCategoryCoreData?
     
     weak var delegate: TrackerCreationSetupViewControllerDelegate?
     weak var previousVC: UIViewController?
@@ -56,6 +57,14 @@ final class TrackerCreationSetupViewController: UIViewController {
     
     // MARK: - Methods
     
+    private func updateSelectedCategory() {
+        categoryViewModel.selectedCategory = { [weak self] selectedCategory in
+            self?.selectedCategoryCoreData = selectedCategory
+            self?.trackerCategoryAndScheduleTableView.reloadData()
+            self?.isTrackerDataReady()
+        }
+    }
+    
     private func switchToCategoryOrScheduleViewController(to vc: UIViewController) {
         let navigationController = UINavigationController(rootViewController: vc)
         self.present(navigationController, animated: true)
@@ -63,7 +72,8 @@ final class TrackerCreationSetupViewController: UIViewController {
     
     private func isTrackerDataReady() {
         guard newTrackerEmoji != nil,
-              newTrackerColor != nil else {
+              newTrackerColor != nil,
+              selectedCategoryCoreData != nil else {
             return
         }
         
@@ -77,7 +87,6 @@ final class TrackerCreationSetupViewController: UIViewController {
                 activateCreateTrackerButton()
             }
         }
-        // TODO: - Add checking category of tracker
         
         return
     }
@@ -95,7 +104,7 @@ final class TrackerCreationSetupViewController: UIViewController {
     
     private func setupViewComponents() {
         setupTrackerNameTextField()
-        setupTableView()
+        setupTrackerCategoryAndScheduleTableView()
         setupCreateTrackerButton()
         setupCancelButton()
         setupEmojisAndColorsCollectionView()
@@ -127,7 +136,7 @@ final class TrackerCreationSetupViewController: UIViewController {
         ])
     }
     
-    private func setupTableView() {
+    private func setupTrackerCategoryAndScheduleTableView() {
         trackerCategoryAndScheduleTableView.delegate = self
         trackerCategoryAndScheduleTableView.dataSource = self
         
@@ -235,11 +244,9 @@ final class TrackerCreationSetupViewController: UIViewController {
                                  emoji: newTrackerEmoji ?? "",
                                  schedule: newTrackerSchedule)
         
-        let updatingTrackerCategory = TrackerCategory(title: "По умолчанию",
+        let updatingTrackerCategory = TrackerCategory(title: selectedCategoryCoreData?.title ?? "",
                                                       trackers: [newTracker])
-        trackerCategoryStore.addTrackerCategoryToCoreData(categoryTitle: updatingTrackerCategory.title)
         trackerStore.addTrackerToCoreData(for: newTracker, to: updatingTrackerCategory)
-        // TODO: - Add a category transfer and move the category store to the category creation screen
         delegate?.updateTrackerCategory(for: updatingTrackerCategory, isHabit: isHabit)
         self.dismiss(animated: true)
         previousVC?.dismiss(animated: true)
@@ -277,9 +284,11 @@ extension TrackerCreationSetupViewController: UITableViewDataSource {
         cell.detailTextLabel?.textColor = .ypGray
         cell.detailTextLabel?.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.tableFontSize)
         cell.backgroundColor = .clear
+        cell.accessoryType = .disclosureIndicator
+        cell.selectionStyle = .none
         
         if indexPath.row == 0 {
-            cell.detailTextLabel?.text = "" // TODO: - Add category value in subtitle
+            cell.detailTextLabel?.text = selectedCategoryCoreData?.title
         } else {
             if newTrackerSchedule.count == 7 {
                 cell.detailTextLabel?.text = "Каждый день"
@@ -296,7 +305,11 @@ extension TrackerCreationSetupViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 0 {
-            let vc = TrackerCategoryChoiceAndCreationViewController()
+            let vc = TrackerCategoryChoiceAndCreationViewController(categoryViewModel: categoryViewModel)
+            if let selectedCategoryCoreData = selectedCategoryCoreData {
+                categoryViewModel.selectedCategory?(selectedCategoryCoreData)
+            }
+            updateSelectedCategory()
             switchToCategoryOrScheduleViewController(to: vc)
         } else {
             let vc = TrackerScheduleViewController()

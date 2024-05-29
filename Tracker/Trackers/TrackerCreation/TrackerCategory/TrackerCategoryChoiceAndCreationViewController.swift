@@ -163,24 +163,9 @@ extension TrackerCategoryChoiceAndCreationViewController: UITableViewDataSource 
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
-        cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        cell.textLabel?.text = categoryViewModel.categoriesCoreData[indexPath.row].title
-        cell.textLabel?.textColor = .ypBlack
-        cell.textLabel?.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.tableFontSize)
-        cell.backgroundColor = .ypBackground
-        cell.selectionStyle = .none
-        
-        if indexPath.last == categoryViewModel.categoriesCoreData.count - 1 {
-            cell.layer.masksToBounds = true
-            cell.layer.cornerRadius = ViewConfigurationConstants.elementsCornerRadius
-            cell.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMaxYCorner]
-            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
-        }
-        
-        if categoryViewModel.selectedCategoryCoreData == categoryViewModel.categoriesCoreData[indexPath.row] {
-            cell.accessoryType = .checkmark
-        }
+        let cell = CategoryTableViewCell(style: .subtitle, reuseIdentifier: "cell")
+        let model = categoryViewModel.viewModelsCells[indexPath.row]
+        cell.configure(with: model)
         
         return cell
     }

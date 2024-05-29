@@ -10,8 +10,8 @@ final class TrackerCreationSetupViewController: UIViewController {
     // MARK: - Properties
     
     private let trackerStore = TrackerStore.shared
+    private let categoryViewModel = CategoryViewModel()
     
-    private lazy var categoryViewModel = CategoryViewModel()
     private lazy var createTrackerButton = UIButton()
     private lazy var cancelButton = UIButton()
     private lazy var trackerNameTextField = UITextField()
@@ -38,12 +38,12 @@ final class TrackerCreationSetupViewController: UIViewController {
     private var newTrackerEmoji: String?
     private var newTrackerColor: UIColor?
     private var shortSchedule: String = ""
+    private var selectedCategoryCoreData: TrackerCategoryCoreData?
     
     weak var delegate: TrackerCreationSetupViewControllerDelegate?
     weak var previousVC: UIViewController?
     
     var isHabit: Bool = false
-    var selectedCategoryCoreData: TrackerCategoryCoreData?
     
     // MARK: - Lifecycle
     
@@ -57,7 +57,7 @@ final class TrackerCreationSetupViewController: UIViewController {
     
     // MARK: - Methods
     
-    func updateSelectedCategory() {
+    private func updateSelectedCategory() {
         categoryViewModel.selectedCategory = { [weak self] selectedCategory in
             self?.selectedCategoryCoreData = selectedCategory
             self?.trackerCategoryAndScheduleTableView.reloadData()
@@ -305,8 +305,7 @@ extension TrackerCreationSetupViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if indexPath.row == 0 {
-            let vc = TrackerCategoryChoiceAndCreationViewController()
-            vc.initialize(viewModel: categoryViewModel)
+            let vc = TrackerCategoryChoiceAndCreationViewController(categoryViewModel: categoryViewModel)
             if let selectedCategoryCoreData = selectedCategoryCoreData {
                 categoryViewModel.selectedCategory?(selectedCategoryCoreData)
             }

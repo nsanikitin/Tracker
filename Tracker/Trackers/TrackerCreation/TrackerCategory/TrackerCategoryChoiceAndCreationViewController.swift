@@ -4,14 +4,23 @@ final class TrackerCategoryChoiceAndCreationViewController: UIViewController {
     
     // MARK: - Properties
     
+    private let categoryViewModel: CategoryViewModel
+    
     private lazy var addCategoryButton = UIButton()
     private lazy var categoryStubLabel = UILabel()
     private lazy var categoryStubImageView = UIImageView()
+    private lazy var categoriesListTableView = UITableView()
     
-    private var categoriesListTableView = UITableView()
-    private var categoriesCoreData: [TrackerCategoryCoreData] = []
-    private var selectedCategoryCoreData: TrackerCategoryCoreData?
-    private var categoryViewModel: CategoryViewModel?
+    // MARK: - Init
+    
+    init(categoryViewModel: CategoryViewModel) {
+        self.categoryViewModel = categoryViewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     // MARK: - Lifecycle
     
@@ -21,29 +30,15 @@ final class TrackerCategoryChoiceAndCreationViewController: UIViewController {
         view.backgroundColor = .ypWhite
         setupNavigationBar()
         setupAddCategoryButton()
+        setupViewComponents()
     }
     
     // MARK: - Methods
     
-    func initialize(viewModel: CategoryViewModel?) {
-        categoryViewModel = viewModel
-        guard let categoryViewModel = categoryViewModel else { return }
-        
-        categoryViewModel.selectedCategory = { [weak self] selectedCategory in
-            self?.selectedCategoryCoreData = selectedCategory
-        }
-        
-        bind()
-    }
-    
-    private func bind() {
-        guard let categoryViewModel = categoryViewModel else { return }
+    private func updateCategoriesList() {
         categoryViewModel.categories = { [weak self] categories in
-            self?.categoriesCoreData = categories
             self?.setupViewComponents()
         }
-        
-        categoryViewModel.fetchTrackerCategoriesFromCoreData()
     }
     
     private func showStubs() {
@@ -63,7 +58,8 @@ final class TrackerCategoryChoiceAndCreationViewController: UIViewController {
     }
     
     private func setupViewComponents() {
-        if categoriesCoreData.isEmpty {
+        categoryViewModel.fetchTrackerCategoriesFromCoreData()
+        if categoryViewModel.categoriesCoreData.isEmpty {
             showStubs()
         } else {
             hideStubs()
@@ -76,7 +72,7 @@ final class TrackerCategoryChoiceAndCreationViewController: UIViewController {
         categoriesListTableView.delegate = self
         categoriesListTableView.dataSource = self
         
-        categoriesListTableView.backgroundColor = .ypBackground
+        categoriesListTableView.backgroundColor = .clear
         categoriesListTableView.rowHeight = ViewConfigurationConstants.tableViewRowHeight
         categoriesListTableView.separatorInset =  UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         
@@ -90,7 +86,7 @@ final class TrackerCategoryChoiceAndCreationViewController: UIViewController {
             categoriesListTableView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             categoriesListTableView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             categoriesListTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-            categoriesListTableView.heightAnchor.constraint(equalToConstant: CGFloat(categoriesCoreData.count) * ViewConfigurationConstants.tableViewRowHeight - 1)
+            categoriesListTableView.bottomAnchor.constraint(equalTo: addCategoryButton.topAnchor, constant: -27)
         ])
     }
     
@@ -152,6 +148,7 @@ final class TrackerCategoryChoiceAndCreationViewController: UIViewController {
     private func addCategoryButtonDidTap() {
         let vc = TrackerCategoryCreationViewController()
         vc.delegate = self
+        updateCategoriesList()
         let navigationController = UINavigationController(rootViewController: vc)
         self.present(navigationController, animated: true)
     }
@@ -162,19 +159,26 @@ final class TrackerCategoryChoiceAndCreationViewController: UIViewController {
 extension TrackerCategoryChoiceAndCreationViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        categoriesCoreData.count
+        categoryViewModel.categoriesCoreData.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
         cell.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        cell.textLabel?.text = categoriesCoreData[indexPath.row].title
+        cell.textLabel?.text = categoryViewModel.categoriesCoreData[indexPath.row].title
         cell.textLabel?.textColor = .ypBlack
         cell.textLabel?.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.tableFontSize)
-        cell.backgroundColor = .clear
+        cell.backgroundColor = .ypBackground
         cell.selectionStyle = .none
         
-        if selectedCategoryCoreData?.title == categoriesCoreData[indexPath.row].title {
+        if indexPath.last == categoryViewModel.categoriesCoreData.count - 1 {
+            cell.layer.masksToBounds = true
+            cell.layer.cornerRadius = ViewConfigurationConstants.elementsCornerRadius
+            cell.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMaxYCorner]
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+        }
+        
+        if categoryViewModel.selectedCategoryCoreData == categoryViewModel.categoriesCoreData[indexPath.row] {
             cell.accessoryType = .checkmark
         }
         
@@ -185,8 +189,7 @@ extension TrackerCategoryChoiceAndCreationViewController: UITableViewDataSource 
 extension TrackerCategoryChoiceAndCreationViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let categoryViewModel = categoryViewModel else { return }
-        categoryViewModel.selectCategory(with: categoriesCoreData[indexPath.row])
+        categoryViewModel.selectCategory(with: categoryViewModel.categoriesCoreData[indexPath.row])
         self.dismiss(animated: true)
     }
 }
@@ -194,8 +197,7 @@ extension TrackerCategoryChoiceAndCreationViewController: UITableViewDelegate {
 // MARK: - TrackerCategoryCreationViewControllerDelegate Extension
 
 extension TrackerCategoryChoiceAndCreationViewController: TrackerCategoryCreationViewControllerDelegate {
-    
-    func updateCategoriesList() {
-        bind()
+    func updateCategories(with categoryTitle: String) {
+        categoryViewModel.updateCategories(with: categoryTitle)
     }
 }

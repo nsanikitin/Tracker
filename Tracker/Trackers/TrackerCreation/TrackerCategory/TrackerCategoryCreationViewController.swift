@@ -2,14 +2,12 @@ import UIKit
 
 protocol TrackerCategoryCreationViewControllerDelegate: AnyObject {
     
-    func updateCategoriesList()
+    func updateCategories(with categoryTitle: String)
 }
 
 final class TrackerCategoryCreationViewController: UIViewController {
     
     // MARK: - Properties
-    
-    private let trackerCategoryStore = TrackerCategoryStore.shared
     
     private lazy var categoryNameTextField = {
         let categoryName = UITextField()
@@ -93,8 +91,7 @@ final class TrackerCategoryCreationViewController: UIViewController {
     
     @objc
     private func isReadyButtonDidTap() {
-        trackerCategoryStore.addTrackerCategoryToCoreData(categoryTitle: categoryNameTextField.text ?? "")
-        delegate?.updateCategoriesList()
+        delegate?.updateCategories(with: categoryNameTextField.text ?? "")
         self.dismiss(animated: true)
     }
     

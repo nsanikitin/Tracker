@@ -7,6 +7,7 @@ final class TrackersViewController: UIViewController {
     private let trackerStore = TrackerStore.shared
     private let trackerCategoryStore = TrackerCategoryStore.shared
     private let trackerRecordStore = TrackerRecordStore.shared
+    private let analyticsService = AnalyticsService()
     
     private lazy var trackStubLabel: UILabel = UILabel()
     private lazy var trackStubImageView: UIImageView = UIImageView()
@@ -41,6 +42,7 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        analyticsService.report(event: "open", params: ["screen" : "Main"])
         view.backgroundColor = .ypWhite
         
         trackerStore.delegate = self
@@ -50,6 +52,11 @@ final class TrackersViewController: UIViewController {
         
         setupNavigationBar()
         setupViewComponents()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+     super.viewWillDisappear(animated)
+        analyticsService.report(event: "close", params: ["screen" : "Main"])
     }
     
     // MARK: - Methods
@@ -227,6 +234,8 @@ final class TrackersViewController: UIViewController {
         let navigationController = UINavigationController(rootViewController: vc)
         vc.originalVC = self
         self.present(navigationController, animated: true)
+        
+        analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "add_track"])
     }
     
     @objc
@@ -234,6 +243,8 @@ final class TrackersViewController: UIViewController {
         currentDate = sender.date
         getCurrentVisibleCategories()
         self.dismiss(animated: false)
+        
+        analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "filter"])
     }
 }
 

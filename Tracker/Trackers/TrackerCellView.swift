@@ -14,6 +14,7 @@ final class TrackerCellView: UICollectionViewCell {
     // MARK: - Properties
     
     static let identifier = "cell"
+    private let analyticsService = AnalyticsService()
     
     private lazy var emojiLabel = UILabel()
     private lazy var nameLabel = UILabel()
@@ -171,6 +172,8 @@ final class TrackerCellView: UICollectionViewCell {
         isTrackerCompleted = !isTrackerCompleted
         setupDaysCounter(for: completedDaysCounter)
         setupCompletedTrack()
+        
+        analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "track"])
     }
 }
 
@@ -196,9 +199,11 @@ extension TrackerCellView {
                     
                     let navigationController = UINavigationController(rootViewController: vc)
                     self?.delegate?.showEditViewController(with: navigationController)
+                    self?.analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "edit"])
                 },
                 UIAction(title: "Удалить", attributes: .destructive) { [weak self] _ in
                     self?.delegate?.deleteTrackerFromCoreData(for: contextMenuTracker.id)
+                    self?.analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "delete"])
                 }
             ])
         })

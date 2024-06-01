@@ -27,13 +27,14 @@ final class TrackersViewController: UIViewController {
         return collectionView
     }()
     
-    private var currentCategories = [TrackerCategory]()
     private var categories: [TrackerCategory] = []
     private var completedTrackers: Set<TrackerRecord> = []
-    private var irregularEvents: [TrackerCategory] = []
     private var completedIrregularEvents: Set<TrackerRecord> = []
-
+    
+    var currentCategories = [TrackerCategory]()
     var currentDate: Date = Date()
+    var pinnedTrackersCoreData: [TrackerCoreData] = []
+    var irregularEvents: [TrackerCategory] = []
     
     // MARK: - Lifecycle
     
@@ -87,8 +88,19 @@ final class TrackersViewController: UIViewController {
     }
     
     private func getCategories() -> [TrackerCategory] {
+        var categories: [TrackerCategory] = []
+        
+        let pinCategory = getPinnedTrackers()
+        if let pinCategory = pinCategory {
+            categories.append(pinCategory)
+        }
+        
         let categoriesCoreData = trackerCategoryStore.trackerCategoriesCoreData
-        let categories = categoriesCoreData.compactMap { trackerCategoryStore.convertTrackerCategoryCoreDataToTrackerCategory(for: $0) }
+        let otherCategories = categoriesCoreData.compactMap {
+            trackerCategoryStore.convertTrackerCategoryCoreDataToTrackerCategory(for: $0)
+        }
+        
+        categories += otherCategories
         
         return categories
     }
@@ -98,6 +110,19 @@ final class TrackersViewController: UIViewController {
         let trackersRecord = trackersRecordCoreData.compactMap { trackerRecordStore.convertTrackerRecordCoreDataToTrackerRecord(for: $0) }
         completedTrackers = Set(trackersRecord)
         return completedTrackers
+    }
+    
+    private func getPinnedTrackers() -> TrackerCategory? {
+        let pinnedTrackersCoreData = trackerStore.trackersCoreData.filter { $0.isPinned }
+        
+        var pinnedTrackers: [Tracker] = []
+        for trackerCoreData in pinnedTrackersCoreData {
+            guard let tracker = trackerStore.convertTrackerCoreDataToTracker(for: trackerCoreData) else { return nil }
+            pinnedTrackers.append(tracker)
+        }
+        let pinCategory = TrackerCategory(title: "Закрепленные", trackers: pinnedTrackers)
+        
+        return pinCategory
     }
     
     private func showStubs() {
@@ -181,6 +206,7 @@ final class TrackersViewController: UIViewController {
         trackersCollectionView.delegate = self
         
         trackersCollectionView.backgroundColor = .clear
+        trackersCollectionView.allowsMultipleSelection = false
         
         trackersCollectionView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(trackersCollectionView)
@@ -286,6 +312,35 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     }
 }
 
+extension TrackersViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: TrackerCellView.identifier,
+            for: indexPath
+        ) as? TrackerCellView else {
+            return UIContextMenuConfiguration()
+        }
+        
+        cell.delegate = self
+        
+        let contextMenuTracker = currentCategories[indexPath.section].trackers[indexPath.row]
+        let contextMenuCategory = currentCategories[indexPath.section]
+        let isPinned = contextMenuTracker.isPinned
+        let numberOfCompletedDays = completedTrackers.filter{ $0.id == contextMenuTracker.id }.count
+        let isIrregularEvent = irregularEvents.contains(
+            where: { $0.trackers.contains(
+                where: { $0.id == contextMenuTracker.id }
+            )}
+        )
+        
+        return cell.configureContextMenu(contextMenuTracker: contextMenuTracker,
+                                         contextMenuCategory: contextMenuCategory,
+                                         isPinned: isPinned,
+                                         isIrregularEvent: isIrregularEvent, 
+                                         numberOfCompletedDays: numberOfCompletedDays)
+    }
+}
+
 // MARK: - TrackerCreationSetupViewControllerDelegate Extension
 
 extension TrackersViewController: TrackerCreationSetupViewControllerDelegate {
@@ -341,12 +396,41 @@ extension TrackersViewController: TrackerCellViewDelegate {
         completedTrackers.remove(trackerRemove)
         trackerRecordStore.deleteTrackerRecordFromCoreData(for: trackerRemove)
     }
+    
+    func deleteTrackerFromCoreData(for trackerID: UUID) {
+        let alert = UIAlertController(title: "", message: "Уверены, что хотите удалить трекер?", preferredStyle: .actionSheet)
+        
+        alert.addAction(UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in
+            self?.removeTrackerFromCategory(for: trackerID)
+            self?.trackerStore.deleteTrackerFromCoreData(for: trackerID)
+        })
+        
+        alert.addAction(UIAlertAction(title: "Отменить", style: .cancel) { _ in })
+        present(alert, animated: true)
+    }
+    
+    func showEditViewController(with navigationController: UINavigationController) {
+        present(navigationController, animated: true)
+    }
+    
+    func pinOrUnpinTracker(for trackerID: UUID, isPinned: Bool) {
+        if isPinned {
+            trackerStore.trackersCoreData.first(where: { $0.id == trackerID })?.isPinned = true
+            removeTrackerFromCategory(for: trackerID)
+        } else {
+            trackerStore.trackersCoreData.first(where: { $0.id == trackerID })?.isPinned = false
+        }
+        
+        categories = getCategories()
+        getCurrentVisibleCategories()
+    }
 }
 
 // MARK: - TrackerStoreDelegate Extension
 
 extension TrackersViewController: TrackerStoreDelegate {
     func updateTrackers() {
+        categories = getCategories()
         getCurrentVisibleCategories()
     }
 }

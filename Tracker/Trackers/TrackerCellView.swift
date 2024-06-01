@@ -4,6 +4,9 @@ protocol TrackerCellViewDelegate: AnyObject {
     
     func addCompletedTracker(for trackerID: UUID)
     func removeCompletedTracker(for trackerID: UUID)
+    func deleteTrackerFromCoreData(for trackerID: UUID)
+    func showEditViewController(with navigationController: UINavigationController)
+    func pinOrUnpinTracker(for trackerID: UUID, isPinned: Bool)
 }
 
 final class TrackerCellView: UICollectionViewCell {
@@ -59,7 +62,7 @@ final class TrackerCellView: UICollectionViewCell {
     }
     
     // MARK: - Cell View Configuration
-
+    
     private func setupTrackColorView(with color: UIColor) {
         trackColorView.backgroundColor = color
         
@@ -114,7 +117,7 @@ final class TrackerCellView: UICollectionViewCell {
         ])
     }
     
-    private func setupDaysCounterLabel(){
+    private func setupDaysCounterLabel() {
         setupDaysCounter(for: completedDaysCounter)
         daysCounterLabel.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.labelFontSize)
         daysCounterLabel.textColor = .ypBlack
@@ -166,5 +169,36 @@ final class TrackerCellView: UICollectionViewCell {
         isTrackerCompleted = !isTrackerCompleted
         setupDaysCounter(for: completedDaysCounter)
         setupCompletedTrack()
+    }
+}
+
+// MARK: - Context Menu Extension
+
+extension TrackerCellView {
+    
+    func configureContextMenu(contextMenuTracker: Tracker, contextMenuCategory: TrackerCategory, isPinned: Bool, isIrregularEvent: Bool, numberOfCompletedDays: Int) -> UIContextMenuConfiguration {
+        
+        return UIContextMenuConfiguration(actionProvider: { actions in
+            return UIMenu(children: [
+                UIAction(title: isPinned ? "Открепить" : "Закрепить") { [weak self] _ in
+                    self?.delegate?.pinOrUnpinTracker(for: contextMenuTracker.id, isPinned: !isPinned)
+                },
+                UIAction(title: "Редактировать") { [weak self] _ in
+                    let vc = TrackerCreationSetupViewController()
+                    vc.isTrackerEditing = true
+                    vc.isHabit = isIrregularEvent ? false : true
+                    self?.setupDaysCounter(for: numberOfCompletedDays)
+                    vc.numberOfCompletedDaysText = self?.daysCounterLabel.text
+                    vc.currentTracker = contextMenuTracker
+                    vc.currentCategory = contextMenuCategory.title
+                    
+                    let navigationController = UINavigationController(rootViewController: vc)
+                    self?.delegate?.showEditViewController(with: navigationController)
+                },
+                UIAction(title: "Удалить", attributes: .destructive) { [weak self] _ in
+                    self?.delegate?.deleteTrackerFromCoreData(for: contextMenuTracker.id)
+                }
+            ])
+        })
     }
 }

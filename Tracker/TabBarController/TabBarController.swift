@@ -25,15 +25,12 @@ final class TabBarController: UITabBarController {
     }
     
     private func setupTabBarItems() {
-        // Track Tab
         trackersViewController.tabBarItem.title = "Трекеры"
         trackersViewController.tabBarItem.image = UIImage(named: "trackerTab")
         
-        // Statistic Tab
         statisticViewController.tabBarItem.title = "Статистика"
         statisticViewController.tabBarItem.image = UIImage(named: "statisticTab")
         
-        // Tab Items
         viewControllers = [
             UINavigationController(rootViewController: trackersViewController),
             UINavigationController(rootViewController: statisticViewController)

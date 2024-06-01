@@ -81,6 +81,7 @@ final class TrackerCellView: UICollectionViewCell {
     
     private func setupEmojiLabel(with emoji: String) {
         emojiLabel.text = emoji
+        emojiLabel.textColor = .ypWhite
         emojiLabel.font = UIFont.systemFont(ofSize: 16)
         emojiLabel.textAlignment = .center
         emojiLabel.backgroundColor = .ypWhite.withAlphaComponent(0.3)
@@ -106,6 +107,7 @@ final class TrackerCellView: UICollectionViewCell {
         nameLabel.textAlignment = .left
         nameLabel.numberOfLines = 2
         nameLabel.lineBreakMode = .byWordWrapping
+        nameLabel.overrideUserInterfaceStyle = .light
         
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(nameLabel)

@@ -154,7 +154,8 @@ final class TrackersViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
-        title = "Трекеры"
+        let titleText = NSLocalizedString("trackers.title", comment: "Трекеры")
+        title = titleText
         navigationController?.navigationBar.prefersLargeTitles = true
         
         let addTrackButton = UIBarButtonItem(

@@ -42,13 +42,17 @@ final class TrackerCellView: UICollectionViewCell {
     }
     
     private func setupDaysCounter(for number: Int) {
+        let dayText = NSLocalizedString("day", comment: "День")
+        let daysText = NSLocalizedString("days", comment: "Дней")
+        let anotherDaysText = NSLocalizedString("days.another", comment: "Дня")
+        
         switch number % 100 {
         case 1:
-            daysCounterLabel.text = "\(number) день"
+            daysCounterLabel.text = "\(number) \(dayText)"
         case 2...4:
-            daysCounterLabel.text = "\(number) дня"
+            daysCounterLabel.text = "\(number) \(anotherDaysText)"
         default:
-            daysCounterLabel.text = "\(number) дней"
+            daysCounterLabel.text = "\(number) \(daysText)"
         }
     }
     

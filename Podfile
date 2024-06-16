@@ -6,7 +6,8 @@ target 'Tracker' do
   use_frameworks!
 
   # Pods for Tracker
-    pod 'YandexMobileMetrica'
+
+pod 'YandexMobileMetrica/Dynamic', '4.5.0'
 
   target 'TrackerTests' do
     inherit! :search_paths

@@ -9,6 +9,7 @@ final class TrackersViewController: UIViewController {
     private let trackerRecordStore = TrackerRecordStore.shared
     private let analyticsService = AnalyticsService()
     
+    private lazy var filtersButton = UIButton()
     private lazy var trackStubLabel: UILabel = UILabel()
     private lazy var trackStubImageView: UIImageView = UIImageView()
     private lazy var trackersCollectionView: UICollectionView = {
@@ -135,6 +136,7 @@ final class TrackersViewController: UIViewController {
     private func showStubs() {
         setupTrackImageStub()
         setupTrackLabelStub()
+        filtersButton.isHidden = true
     }
     
     private func hideStubs() {
@@ -151,6 +153,7 @@ final class TrackersViewController: UIViewController {
         }
         
         setupCollectionView()
+        setupFiltersButton()
     }
     
     private func setupNavigationBar() {
@@ -215,6 +218,7 @@ final class TrackersViewController: UIViewController {
         
         trackersCollectionView.backgroundColor = .clear
         trackersCollectionView.allowsMultipleSelection = false
+        trackersCollectionView.alwaysBounceVertical = true
         
         trackersCollectionView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(trackersCollectionView)
@@ -224,6 +228,30 @@ final class TrackersViewController: UIViewController {
             trackersCollectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             trackersCollectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             trackersCollectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
+        ])
+    }
+    
+    private func setupFiltersButton() {
+        let buttonText = NSLocalizedString("filters", comment: "Фильтры")
+        filtersButton.setTitle(buttonText, for: .normal)
+        filtersButton.titleLabel?.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.buttonFontSize)
+        filtersButton.backgroundColor = .ypBlue
+        filtersButton.tintColor = .ypWhite
+        
+        filtersButton.isEnabled = true
+        filtersButton.addTarget(self, action: #selector(filtersButtonDidTap), for: .touchUpInside)
+        
+        filtersButton.layer.masksToBounds = true
+        filtersButton.layer.cornerRadius = ViewConfigurationConstants.elementsCornerRadius
+        
+        filtersButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(filtersButton)
+        
+        NSLayoutConstraint.activate([
+            filtersButton.widthAnchor.constraint(equalToConstant: 114),
+            filtersButton.heightAnchor.constraint(equalToConstant: 50),
+            filtersButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            filtersButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
         ])
     }
     
@@ -246,6 +274,15 @@ final class TrackersViewController: UIViewController {
         self.dismiss(animated: false)
         
         analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "filter"])
+    }
+    
+    @objc
+    private func filtersButtonDidTap() {
+        analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "filter"])
+        let vc = FiltersViewController()
+        let navigationController = UINavigationController(rootViewController: vc)
+        vc.delegate = self
+        self.present(navigationController, animated: true)
     }
 }
 
@@ -446,3 +483,13 @@ extension TrackersViewController: TrackerStoreDelegate {
         getCurrentVisibleCategories()
     }
 }
+
+// MARK: - FiltersViewControllerDelegate Extension
+
+extension TrackersViewController: FiltersViewControllerDelegate {
+    
+    func didSelectFilter() {
+        
+    }
+}
+

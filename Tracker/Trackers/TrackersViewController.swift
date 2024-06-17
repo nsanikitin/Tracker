@@ -44,10 +44,11 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        analyticsService.report(event: "open", params: ["screen" : "Main"])
         view.backgroundColor = .ypWhite
         
+        analyticsService.report(event: "open", params: ["screen" : "Main"])
         UserDefaultsStorage().filterType = 0
+        
         trackerStore.delegate = self
         categories = getCategories()
         completedTrackers = getCompletedTrackers()
@@ -413,6 +414,7 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 }
 
 extension TrackersViewController: UICollectionViewDelegate {
+    
     func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         guard let cell = collectionView.dequeueReusableCell(
             withReuseIdentifier: TrackerCellView.identifier,
@@ -529,6 +531,7 @@ extension TrackersViewController: TrackerCellViewDelegate {
 // MARK: - TrackerStoreDelegate Extension
 
 extension TrackersViewController: TrackerStoreDelegate {
+    
     func updateTrackers() {
         categories = getCategories()
         getCurrentVisibleCategories()
@@ -543,4 +546,3 @@ extension TrackersViewController: FiltersViewControllerDelegate {
         getFilteredCategories()
     }
 }
-

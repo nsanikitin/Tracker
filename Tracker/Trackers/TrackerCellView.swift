@@ -212,4 +212,8 @@ extension TrackerCellView {
             ])
         })
     }
+    
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfiguration configuration: UIContextMenuConfiguration, highlightPreviewForItemAt indexPath: IndexPath) -> UITargetedPreview? {
+        return UITargetedPreview(view: trackColorView)
+    }
 }

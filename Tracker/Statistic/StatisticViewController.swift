@@ -10,7 +10,7 @@ final class StatisticViewController: UIViewController {
     private lazy var statisticStubImageView = UIImageView()
     private lazy var completedTrackersLabel = UILabel()
     private lazy var completedTrackersQuantityLabel = UILabel()
-    private lazy var gradientFrameView = UIView()
+    private lazy var statisticImageView = UIImageView()
     
     // MARK: - Lifecycle
     
@@ -44,7 +44,7 @@ final class StatisticViewController: UIViewController {
     private func hideStatistic() {
         completedTrackersLabel.isHidden = true
         completedTrackersQuantityLabel.isHidden = true
-        gradientFrameView.isHidden = true
+        statisticImageView.isHidden = true
     }
     
     // MARK: - Statistic View Configuration
@@ -68,41 +68,41 @@ final class StatisticViewController: UIViewController {
     }
     
     private func setupGradientFrameView() {
-        gradientFrameView.backgroundColor = .clear
-        gradientFrameView.clipsToBounds = true
+        statisticImageView.backgroundColor = .clear
         
-        gradientFrameView.layer.masksToBounds = true
-        gradientFrameView.layer.cornerRadius = ViewConfigurationConstants.elementsCornerRadius
-        gradientFrameView.layer.borderWidth = 1
+        statisticImageView.layer.masksToBounds = true
+        statisticImageView.layer.cornerRadius = ViewConfigurationConstants.elementsCornerRadius
+        
+        statisticImageView.frame = CGRect(x: 16, y: self.view.frame.midY - 45, width: self.view.frame.width - 32, height: 90)
         
         let gradient = CAGradientLayer()
-        gradient.frame = gradientFrameView.bounds
+        gradient.frame = statisticImageView.bounds
         gradient.colors = [UIColor.red.cgColor, UIColor.green.cgColor, UIColor.blue.cgColor]
         gradient.startPoint = CGPoint(x: 0, y: 0.5)
         gradient.endPoint = CGPoint(x: 1, y: 0.5)
         
         let shape = CAShapeLayer()
         shape.lineWidth = 1
-        shape.path = UIBezierPath(roundedRect: gradientFrameView.bounds, cornerRadius: gradientFrameView.layer.cornerRadius).cgPath
+        shape.path = UIBezierPath(roundedRect: statisticImageView.bounds, cornerRadius: ViewConfigurationConstants.elementsCornerRadius).cgPath
         shape.strokeColor = UIColor.ypBlack.cgColor
         shape.fillColor = UIColor.clear.cgColor
         gradient.mask = shape
-
-        gradientFrameView.layer.addSublayer(gradient)
         
-        gradientFrameView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(gradientFrameView)
+        statisticImageView.layer.addSublayer(gradient)
+        
+        statisticImageView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(statisticImageView)
         
         NSLayoutConstraint.activate([
-            gradientFrameView.heightAnchor.constraint(equalToConstant: 90),
-            gradientFrameView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -126),
-            gradientFrameView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-            gradientFrameView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
+            statisticImageView.heightAnchor.constraint(equalToConstant: 90),
+            statisticImageView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -126),
+            statisticImageView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            statisticImageView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
         ])
     }
     
     private func setupCompletedTrackersQuantityLabel() {
-        completedTrackersQuantityLabel.text = String(describing: trackerStoreRecord.trackersRecordCoreData.count)
+        completedTrackersQuantityLabel.text = String(describing: trackerStoreRecord.fetchTrackersRecordFromCoreData().count)
         completedTrackersQuantityLabel.font = UIFont.systemFont(ofSize: 34, weight: .bold)
         completedTrackersQuantityLabel.textColor = .ypBlack
         completedTrackersQuantityLabel.isHidden = false
@@ -111,10 +111,10 @@ final class StatisticViewController: UIViewController {
         view.addSubview(completedTrackersQuantityLabel)
         
         NSLayoutConstraint.activate([
-            completedTrackersQuantityLabel.topAnchor.constraint(equalTo: gradientFrameView.topAnchor, constant: 12),
-            completedTrackersQuantityLabel.bottomAnchor.constraint(equalTo: gradientFrameView.bottomAnchor, constant: -37),
-            completedTrackersQuantityLabel.leadingAnchor.constraint(equalTo: gradientFrameView.leadingAnchor, constant: 12),
-            completedTrackersQuantityLabel.trailingAnchor.constraint(equalTo: gradientFrameView.trailingAnchor, constant: -12)
+            completedTrackersQuantityLabel.topAnchor.constraint(equalTo: statisticImageView.topAnchor, constant: 12),
+            completedTrackersQuantityLabel.bottomAnchor.constraint(equalTo: statisticImageView.bottomAnchor, constant: -37),
+            completedTrackersQuantityLabel.leadingAnchor.constraint(equalTo: statisticImageView.leadingAnchor, constant: 12),
+            completedTrackersQuantityLabel.trailingAnchor.constraint(equalTo: statisticImageView.trailingAnchor, constant: -12)
         ])
     }
     

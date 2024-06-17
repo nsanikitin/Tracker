@@ -51,7 +51,7 @@ final class StatisticViewController: UIViewController {
     
     private func setupViewComponents() {
         if trackerStoreRecord.trackersRecordCoreData.count != 0 {
-            setupGradientFrameView()
+            setupStatisticView()
             setupCompletedTrackersQuantityLabel()
             setupCompletedTrackersLabel()
             hideStatisticStubs()
@@ -67,13 +67,12 @@ final class StatisticViewController: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
     }
     
-    private func setupGradientFrameView() {
+    private func setupStatisticView() {
         statisticImageView.backgroundColor = .clear
+        statisticImageView.frame = CGRect(x: 16, y: self.view.frame.midY - 45, width: self.view.frame.width - 32, height: 90)
         
         statisticImageView.layer.masksToBounds = true
         statisticImageView.layer.cornerRadius = ViewConfigurationConstants.elementsCornerRadius
-        
-        statisticImageView.frame = CGRect(x: 16, y: self.view.frame.midY - 45, width: self.view.frame.width - 32, height: 90)
         
         let gradient = CAGradientLayer()
         gradient.frame = statisticImageView.bounds

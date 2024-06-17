@@ -10,6 +10,7 @@ final class TrackersViewController: UIViewController {
     private let analyticsService = AnalyticsService()
     
     private lazy var filtersButton = UIButton()
+    private lazy var datePicker = UIDatePicker()
     private lazy var trackStubLabel: UILabel = UILabel()
     private lazy var trackStubImageView: UIImageView = UIImageView()
     private lazy var trackersCollectionView: UICollectionView = {
@@ -46,6 +47,7 @@ final class TrackersViewController: UIViewController {
         analyticsService.report(event: "open", params: ["screen" : "Main"])
         view.backgroundColor = .ypWhite
         
+        UserDefaultsStorage().filterType = 0
         trackerStore.delegate = self
         categories = getCategories()
         completedTrackers = getCompletedTrackers()
@@ -56,11 +58,29 @@ final class TrackersViewController: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-     super.viewWillDisappear(animated)
+        super.viewWillDisappear(animated)
         analyticsService.report(event: "close", params: ["screen" : "Main"])
     }
     
     // MARK: - Methods
+    
+    private func getFilteredCategories() {
+        categories = getCategories()
+        
+        switch UserDefaultsStorage().filterType {
+        case 1: // trackers for today
+            datePicker.date = Date()
+            currentDate = Date()
+        case 2: // finished trackers
+            getFinishedCategories()
+        case 3: // not finished trackers
+            getNotFinishedCategories()
+        default: // all trackers
+            break
+        }
+        
+        getCurrentVisibleCategories()
+    }
     
     private func getCurrentVisibleCategories() {
         var newTrackerCategories = categories.map { getTrackerCategoryAtWeekDay(for: $0) }
@@ -111,6 +131,30 @@ final class TrackersViewController: UIViewController {
         categories += otherCategories
         
         return categories
+    }
+    
+    private func getFinishedCategories() {
+        categories = categories.map { category in
+            let completedTrackers = category.trackers.filter { tracker in
+                isTrackerCompletedOnDate(tracker: tracker)
+            }
+            return TrackerCategory(title: category.title, trackers: completedTrackers)
+        }
+    }
+    
+    private func getNotFinishedCategories() {
+        categories = categories.map { category in
+            let completedTrackers = category.trackers.filter { tracker in
+                !isTrackerCompletedOnDate(tracker: tracker)
+            }
+            return TrackerCategory(title: category.title, trackers: completedTrackers)
+        }
+    }
+    
+    private func isTrackerCompletedOnDate(tracker: Tracker) -> Bool {
+        return completedTrackers.contains { completedTracker in
+            completedTracker.id == tracker.id && Calendar.current.isDate(completedTracker.date, inSameDayAs: currentDate)
+        }
     }
     
     private func getCompletedTrackers() -> Set<TrackerRecord> {
@@ -170,7 +214,6 @@ final class TrackersViewController: UIViewController {
         addTrackButton.tintColor = .ypBlack
         self.navigationItem.leftBarButtonItem = addTrackButton
         
-        let datePicker = UIDatePicker()
         datePicker.preferredDatePickerStyle = .compact
         datePicker.datePickerMode = .date
         datePicker.locale = Locale(identifier: "ru_RU")
@@ -270,7 +313,15 @@ final class TrackersViewController: UIViewController {
     @objc
     private func datePickerValueChanged(_ sender: UIDatePicker) {
         currentDate = sender.date
-        getCurrentVisibleCategories()
+        
+        if currentCategories.isEmpty,
+           UserDefaultsStorage().filterType != 0 {
+            categories = getCategories()
+            filtersButton.isHidden = false
+        }
+        
+        getFilteredCategories()
+        
         self.dismiss(animated: false)
         
         analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "filter"])
@@ -315,7 +366,7 @@ extension TrackersViewController: UICollectionViewDataSource {
                 return true
             } else { return false }
         }
-        let completedDays = completedTrackers.filter{ $0.id == currentTracker.id }.count
+        let completedDays = completedTrackers.filter { $0.id == currentTracker.id }.count
         
         cell.isTrackerCompleted = isTrackerCompleted
         cell.completedDaysCounter = completedDays
@@ -385,7 +436,7 @@ extension TrackersViewController: UICollectionViewDelegate {
         return cell.configureContextMenu(contextMenuTracker: contextMenuTracker,
                                          contextMenuCategory: contextMenuCategory,
                                          isPinned: isPinned,
-                                         isIrregularEvent: isIrregularEvent, 
+                                         isIrregularEvent: isIrregularEvent,
                                          numberOfCompletedDays: numberOfCompletedDays)
     }
 }
@@ -489,7 +540,7 @@ extension TrackersViewController: TrackerStoreDelegate {
 extension TrackersViewController: FiltersViewControllerDelegate {
     
     func didSelectFilter() {
-        
+        getFilteredCategories()
     }
 }
 

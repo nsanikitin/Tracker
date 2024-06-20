@@ -20,25 +20,38 @@ final class StatisticViewController: UIViewController {
         view.backgroundColor = .ypWhite
         setupNavigationBar()
         setupViewComponents()
+        showStubsOrStatistic()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         updateStatistic()
+        showStubsOrStatistic()
     }
     
     // MARK: - Methods
     
     private func updateStatistic() {
-        if trackerStoreRecord.trackersRecordCoreData.count != 0 {
-            setupCompletedTrackersQuantityLabel()
+        if trackerStoreRecord.fetchTrackersRecordFromCoreData().count != 0 {
+            completedTrackersQuantityLabel.text = String(describing: trackerStoreRecord.fetchTrackersRecordFromCoreData().count)
+        }
+    }
+    
+    private func showStubsOrStatistic() {
+        if trackerStoreRecord.fetchTrackersRecordFromCoreData().count != 0 {
+            hideStatisticStubs()
+        } else {
+            hideStatistic()
         }
     }
     
     private func hideStatisticStubs() {
         statisticStubLabel.isHidden = true
         statisticStubImageView.isHidden = true
+        setupStatisticView()
+        setupCompletedTrackersQuantityLabel()
+        setupCompletedTrackersLabel()
     }
     
     private func hideStatistic() {
@@ -50,16 +63,11 @@ final class StatisticViewController: UIViewController {
     // MARK: - Statistic View Configuration
     
     private func setupViewComponents() {
-        if trackerStoreRecord.trackersRecordCoreData.count != 0 {
-            setupStatisticView()
-            setupCompletedTrackersQuantityLabel()
-            setupCompletedTrackersLabel()
-            hideStatisticStubs()
-        } else {
-            setupStatisticStubImageView()
-            setupStatisticStubLabel()
-            hideStatistic()
-        }
+        setupStatisticStubImageView()
+        setupStatisticStubLabel()
+        setupStatisticView()
+        setupCompletedTrackersQuantityLabel()
+        setupCompletedTrackersLabel()
     }
     
     private func setupNavigationBar() {
@@ -68,6 +76,7 @@ final class StatisticViewController: UIViewController {
     }
     
     private func setupStatisticView() {
+        statisticImageView.isHidden = false
         statisticImageView.backgroundColor = .clear
         statisticImageView.frame = CGRect(x: 16, y: self.view.frame.midY - 45, width: self.view.frame.width - 32, height: 90)
         

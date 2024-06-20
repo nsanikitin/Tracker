@@ -186,34 +186,32 @@ final class TrackerCellView: UICollectionViewCell {
 extension TrackerCellView {
     
     func configureContextMenu(contextMenuTracker: Tracker, contextMenuCategory: TrackerCategory, isPinned: Bool, isIrregularEvent: Bool, numberOfCompletedDays: Int) -> UIContextMenuConfiguration {
-        
-        return UIContextMenuConfiguration(actionProvider: { actions in
-            return UIMenu(children: [
-                UIAction(title: isPinned ? "Открепить" : "Закрепить") { [weak self] _ in
-                    self?.delegate?.pinOrUnpinTracker(for: contextMenuTracker.id, isPinned: !isPinned)
-                },
-                UIAction(title: "Редактировать") { [weak self] _ in
-                    let vc = TrackerCreationSetupViewController()
-                    vc.isTrackerEditing = true
-                    vc.isHabit = isIrregularEvent ? false : true
-                    self?.setupDaysCounter(for: numberOfCompletedDays)
-                    vc.numberOfCompletedDaysText = self?.daysCounterLabel.text
-                    vc.currentTracker = contextMenuTracker
-                    vc.currentCategory = contextMenuCategory.title
-                    
-                    let navigationController = UINavigationController(rootViewController: vc)
-                    self?.delegate?.showEditViewController(with: navigationController)
-                    self?.analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "edit"])
-                },
-                UIAction(title: "Удалить", attributes: .destructive) { [weak self] _ in
-                    self?.delegate?.deleteTrackerFromCoreData(for: contextMenuTracker.id)
-                    self?.analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "delete"])
-                }
-            ])
-        })
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, contextMenuConfiguration configuration: UIContextMenuConfiguration, highlightPreviewForItemAt indexPath: IndexPath) -> UITargetedPreview? {
-        return UITargetedPreview(view: trackColorView)
+        return UIContextMenuConfiguration(
+            previewProvider: nil,
+            actionProvider: { actions in
+                return UIMenu(children: [
+                    UIAction(title: isPinned ? "Открепить" : "Закрепить") { [weak self] _ in
+                        self?.delegate?.pinOrUnpinTracker(for: contextMenuTracker.id, isPinned: !isPinned)
+                    },
+                    UIAction(title: "Редактировать") { [weak self] _ in
+                        let vc = TrackerCreationSetupViewController()
+                        vc.isTrackerEditing = true
+                        vc.isHabit = isIrregularEvent ? false : true
+                        self?.setupDaysCounter(for: numberOfCompletedDays)
+                        vc.numberOfCompletedDaysText = self?.daysCounterLabel.text
+                        vc.currentTracker = contextMenuTracker
+                        vc.currentCategory = contextMenuCategory.title
+                        
+                        let navigationController = UINavigationController(rootViewController: vc)
+                        self?.delegate?.showEditViewController(with: navigationController)
+                        self?.analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "edit"])
+                    },
+                    UIAction(title: "Удалить", attributes: .destructive) { [weak self] _ in
+                        self?.delegate?.deleteTrackerFromCoreData(for: contextMenuTracker.id)
+                        self?.analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "delete"])
+                    }
+                ])
+            }
+        )
     }
 }

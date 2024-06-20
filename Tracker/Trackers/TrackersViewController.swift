@@ -129,7 +129,18 @@ final class TrackersViewController: UIViewController {
             trackerCategoryStore.convertTrackerCategoryCoreDataToTrackerCategory(for: $0)
         }
         
-        categories += otherCategories
+        var otherCategoriesWithoutPinnedTrackers: [TrackerCategory] = []
+        for category in otherCategories {
+            var unpinnedTrackers: [Tracker] = []
+            for tracker in category.trackers {
+                if !tracker.isPinned {
+                    unpinnedTrackers.append(tracker)
+                }
+            }
+            otherCategoriesWithoutPinnedTrackers.append(TrackerCategory(title: category.title, trackers: unpinnedTrackers))
+        }
+        
+        categories += otherCategoriesWithoutPinnedTrackers
         
         return categories
     }

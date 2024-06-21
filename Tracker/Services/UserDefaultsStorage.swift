@@ -12,4 +12,13 @@ final class UserDefaultsStorage {
             userDefaults.set(true, forKey: "onboardingIsCompleted")
         }
     }
+    
+    var filterType: Int? {
+        get {
+            userDefaults.integer(forKey: "filterType")
+        }
+        set {
+            userDefaults.setValue(newValue, forKey: "filterType")
+        }
+    }
 }

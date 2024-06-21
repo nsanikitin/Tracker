@@ -61,6 +61,8 @@ final class TrackerStore: NSObject {
         trackerEntity.emoji = tracker.emoji
         trackerEntity.color = UIColorMarshalling.hexString(from: tracker.color)
         trackerEntity.schedule = tracker.schedule as NSObject
+        trackerEntity.isPinned = tracker.isPinned
+        trackerEntity.lastCategory = tracker.lastCategory
         
         let categoriesFromCoreData = TrackerCategoryStore.shared.fetchTrackerCategoriesFromCoreData()
         let currentCategory = categoriesFromCoreData.first(where: { $0.title == category.title})
@@ -98,15 +100,20 @@ final class TrackerStore: NSObject {
             let name = tracker.name,
             let emoji = tracker.emoji,
             let color = tracker.color,
-            let schedule = tracker.schedule
+            let schedule = tracker.schedule,
+            let lastCategory = tracker.lastCategory
         else { return nil }
+        
+        let isPinned = tracker.isPinned
         
         return Tracker(
             id: id,
             name: name,
             color: UIColorMarshalling.color(from: color),
             emoji: emoji,
-            schedule: schedule as! [WeekDay]
+            schedule: schedule as! [WeekDay], 
+            isPinned: isPinned,
+            lastCategory: lastCategory
         )
     }
 }

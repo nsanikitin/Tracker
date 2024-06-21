@@ -7,7 +7,10 @@ final class TrackersViewController: UIViewController {
     private let trackerStore = TrackerStore.shared
     private let trackerCategoryStore = TrackerCategoryStore.shared
     private let trackerRecordStore = TrackerRecordStore.shared
+    private let analyticsService = AnalyticsService()
     
+    private lazy var filtersButton = UIButton()
+    private lazy var datePicker = UIDatePicker()
     private lazy var trackStubLabel: UILabel = UILabel()
     private lazy var trackStubImageView: UIImageView = UIImageView()
     private lazy var trackersCollectionView: UICollectionView = {
@@ -27,13 +30,14 @@ final class TrackersViewController: UIViewController {
         return collectionView
     }()
     
-    private var currentCategories = [TrackerCategory]()
     private var categories: [TrackerCategory] = []
     private var completedTrackers: Set<TrackerRecord> = []
-    private var irregularEvents: [TrackerCategory] = []
     private var completedIrregularEvents: Set<TrackerRecord> = []
-
+    
+    var currentCategories = [TrackerCategory]()
     var currentDate: Date = Date()
+    var pinnedTrackersCoreData: [TrackerCoreData] = []
+    var irregularEvents: [TrackerCategory] = []
     
     // MARK: - Lifecycle
     
@@ -41,6 +45,9 @@ final class TrackersViewController: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .ypWhite
+        
+        analyticsService.report(event: "open", params: ["screen" : "Main"])
+        UserDefaultsStorage().filterType = 0
         
         trackerStore.delegate = self
         categories = getCategories()
@@ -51,7 +58,30 @@ final class TrackersViewController: UIViewController {
         setupViewComponents()
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        analyticsService.report(event: "close", params: ["screen" : "Main"])
+    }
+    
     // MARK: - Methods
+    
+    private func getFilteredCategories() {
+        categories = getCategories()
+        
+        switch UserDefaultsStorage().filterType {
+        case 1: // trackers for today
+            datePicker.date = Date()
+            currentDate = Date()
+        case 2: // finished trackers
+            getFinishedCategories()
+        case 3: // not finished trackers
+            getNotFinishedCategories()
+        default: // all trackers
+            break
+        }
+        
+        getCurrentVisibleCategories()
+    }
     
     private func getCurrentVisibleCategories() {
         var newTrackerCategories = categories.map { getTrackerCategoryAtWeekDay(for: $0) }
@@ -87,10 +117,56 @@ final class TrackersViewController: UIViewController {
     }
     
     private func getCategories() -> [TrackerCategory] {
+        var categories: [TrackerCategory] = []
+        
+        let pinCategory = getPinnedTrackers()
+        if let pinCategory = pinCategory {
+            categories.append(pinCategory)
+        }
+        
         let categoriesCoreData = trackerCategoryStore.trackerCategoriesCoreData
-        let categories = categoriesCoreData.compactMap { trackerCategoryStore.convertTrackerCategoryCoreDataToTrackerCategory(for: $0) }
+        let otherCategories = categoriesCoreData.compactMap {
+            trackerCategoryStore.convertTrackerCategoryCoreDataToTrackerCategory(for: $0)
+        }
+        
+        var otherCategoriesWithoutPinnedTrackers: [TrackerCategory] = []
+        for category in otherCategories {
+            var unpinnedTrackers: [Tracker] = []
+            for tracker in category.trackers {
+                if !tracker.isPinned {
+                    unpinnedTrackers.append(tracker)
+                }
+            }
+            otherCategoriesWithoutPinnedTrackers.append(TrackerCategory(title: category.title, trackers: unpinnedTrackers))
+        }
+        
+        categories += otherCategoriesWithoutPinnedTrackers
         
         return categories
+    }
+    
+    private func getFinishedCategories() {
+        categories = categories.map { category in
+            let completedTrackers = category.trackers.filter { tracker in
+                isTrackerCompletedOnDate(tracker: tracker)
+            }
+            return TrackerCategory(title: category.title, trackers: completedTrackers)
+        }
+    }
+    
+    private func getNotFinishedCategories() {
+        categories = categories.map { category in
+            let completedTrackers = category.trackers.filter { tracker in
+                !isTrackerCompletedOnDate(tracker: tracker)
+            }
+            return TrackerCategory(title: category.title, trackers: completedTrackers)
+        }
+    }
+    
+    private func isTrackerCompletedOnDate(tracker: Tracker) -> Bool {
+        return completedTrackers.contains { completedTracker in
+            completedTracker.id == tracker.id && Calendar.current.isDate(completedTracker.date, inSameDayAs: currentDate)
+        }
     }
     
     private func getCompletedTrackers() -> Set<TrackerRecord> {
@@ -100,9 +176,23 @@ final class TrackersViewController: UIViewController {
         return completedTrackers
     }
     
+    private func getPinnedTrackers() -> TrackerCategory? {
+        let pinnedTrackersCoreData = trackerStore.trackersCoreData.filter { $0.isPinned }
+        
+        var pinnedTrackers: [Tracker] = []
+        for trackerCoreData in pinnedTrackersCoreData {
+            guard let tracker = trackerStore.convertTrackerCoreDataToTracker(for: trackerCoreData) else { return nil }
+            pinnedTrackers.append(tracker)
+        }
+        let pinCategory = TrackerCategory(title: "Закрепленные", trackers: pinnedTrackers)
+        
+        return pinCategory
+    }
+    
     private func showStubs() {
         setupTrackImageStub()
         setupTrackLabelStub()
+        filtersButton.isHidden = true
     }
     
     private func hideStubs() {
@@ -119,10 +209,12 @@ final class TrackersViewController: UIViewController {
         }
         
         setupCollectionView()
+        setupFiltersButton()
     }
     
     private func setupNavigationBar() {
-        title = "Трекеры"
+        let titleText = NSLocalizedString("trackers.title", comment: "Трекеры")
+        title = titleText
         navigationController?.navigationBar.prefersLargeTitles = true
         
         let addTrackButton = UIBarButtonItem(
@@ -134,7 +226,6 @@ final class TrackersViewController: UIViewController {
         addTrackButton.tintColor = .ypBlack
         self.navigationItem.leftBarButtonItem = addTrackButton
         
-        let datePicker = UIDatePicker()
         datePicker.preferredDatePickerStyle = .compact
         datePicker.datePickerMode = .date
         datePicker.locale = Locale(identifier: "ru_RU")
@@ -181,6 +272,8 @@ final class TrackersViewController: UIViewController {
         trackersCollectionView.delegate = self
         
         trackersCollectionView.backgroundColor = .clear
+        trackersCollectionView.allowsMultipleSelection = false
+        trackersCollectionView.alwaysBounceVertical = true
         
         trackersCollectionView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(trackersCollectionView)
@@ -193,6 +286,30 @@ final class TrackersViewController: UIViewController {
         ])
     }
     
+    private func setupFiltersButton() {
+        let buttonText = NSLocalizedString("filters", comment: "Фильтры")
+        filtersButton.setTitle(buttonText, for: .normal)
+        filtersButton.titleLabel?.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.buttonFontSize)
+        filtersButton.backgroundColor = .ypBlue
+        filtersButton.tintColor = .ypWhite
+        
+        filtersButton.isEnabled = true
+        filtersButton.addTarget(self, action: #selector(filtersButtonDidTap), for: .touchUpInside)
+        
+        filtersButton.layer.masksToBounds = true
+        filtersButton.layer.cornerRadius = ViewConfigurationConstants.elementsCornerRadius
+        
+        filtersButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(filtersButton)
+        
+        NSLayoutConstraint.activate([
+            filtersButton.widthAnchor.constraint(equalToConstant: 114),
+            filtersButton.heightAnchor.constraint(equalToConstant: 50),
+            filtersButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            filtersButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+        ])
+    }
+    
     // MARK: - Actions
     
     @objc
@@ -201,13 +318,34 @@ final class TrackersViewController: UIViewController {
         let navigationController = UINavigationController(rootViewController: vc)
         vc.originalVC = self
         self.present(navigationController, animated: true)
+        
+        analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "add_track"])
     }
     
     @objc
     private func datePickerValueChanged(_ sender: UIDatePicker) {
         currentDate = sender.date
-        getCurrentVisibleCategories()
+        
+        if currentCategories.isEmpty,
+           UserDefaultsStorage().filterType != 0 {
+            categories = getCategories()
+            filtersButton.isHidden = false
+        }
+        
+        getFilteredCategories()
+        
         self.dismiss(animated: false)
+        
+        analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "filter"])
+    }
+    
+    @objc
+    private func filtersButtonDidTap() {
+        analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "filter"])
+        let vc = FiltersViewController()
+        let navigationController = UINavigationController(rootViewController: vc)
+        vc.delegate = self
+        self.present(navigationController, animated: true)
     }
 }
 
@@ -240,7 +378,7 @@ extension TrackersViewController: UICollectionViewDataSource {
                 return true
             } else { return false }
         }
-        let completedDays = completedTrackers.filter{ $0.id == currentTracker.id }.count
+        let completedDays = completedTrackers.filter { $0.id == currentTracker.id }.count
         
         cell.isTrackerCompleted = isTrackerCompleted
         cell.completedDaysCounter = completedDays
@@ -283,6 +421,36 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
                                                          height: UIView.layoutFittingExpandedSize.height),
                                                   withHorizontalFittingPriority: .required,
                                                   verticalFittingPriority: .fittingSizeLevel)
+    }
+}
+
+extension TrackersViewController: UICollectionViewDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: TrackerCellView.identifier,
+            for: indexPath
+        ) as? TrackerCellView else {
+            return UIContextMenuConfiguration()
+        }
+        
+        cell.delegate = self
+        
+        let contextMenuTracker = currentCategories[indexPath.section].trackers[indexPath.row]
+        let contextMenuCategory = currentCategories[indexPath.section]
+        let isPinned = contextMenuTracker.isPinned
+        let numberOfCompletedDays = completedTrackers.filter{ $0.id == contextMenuTracker.id }.count
+        let isIrregularEvent = irregularEvents.contains(
+            where: { $0.trackers.contains(
+                where: { $0.id == contextMenuTracker.id }
+            )}
+        )
+        
+        return cell.configureContextMenu(contextMenuTracker: contextMenuTracker,
+                                         contextMenuCategory: contextMenuCategory,
+                                         isPinned: isPinned,
+                                         isIrregularEvent: isIrregularEvent,
+                                         numberOfCompletedDays: numberOfCompletedDays)
     }
 }
 
@@ -341,12 +509,51 @@ extension TrackersViewController: TrackerCellViewDelegate {
         completedTrackers.remove(trackerRemove)
         trackerRecordStore.deleteTrackerRecordFromCoreData(for: trackerRemove)
     }
+    
+    func deleteTrackerFromCoreData(for trackerID: UUID) {
+        let alert = UIAlertController(title: "", message: "Уверены, что хотите удалить трекер?", preferredStyle: .actionSheet)
+        
+        alert.addAction(UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in
+            self?.removeTrackerFromCategory(for: trackerID)
+            self?.trackerStore.deleteTrackerFromCoreData(for: trackerID)
+        })
+        
+        alert.addAction(UIAlertAction(title: "Отменить", style: .cancel) { _ in })
+        present(alert, animated: true)
+    }
+    
+    func showEditViewController(with navigationController: UINavigationController) {
+        present(navigationController, animated: true)
+    }
+    
+    func pinOrUnpinTracker(for trackerID: UUID, isPinned: Bool) {
+        if isPinned {
+            trackerStore.trackersCoreData.first(where: { $0.id == trackerID })?.isPinned = true
+            removeTrackerFromCategory(for: trackerID)
+        } else {
+            trackerStore.trackersCoreData.first(where: { $0.id == trackerID })?.isPinned = false
+        }
+        
+        categories = getCategories()
+        getCurrentVisibleCategories()
+    }
 }
 
 // MARK: - TrackerStoreDelegate Extension
 
 extension TrackersViewController: TrackerStoreDelegate {
+    
     func updateTrackers() {
+        categories = getCategories()
         getCurrentVisibleCategories()
+    }
+}
+
+// MARK: - FiltersViewControllerDelegate Extension
+
+extension TrackersViewController: FiltersViewControllerDelegate {
+    
+    func didSelectFilter() {
+        getFilteredCategories()
     }
 }

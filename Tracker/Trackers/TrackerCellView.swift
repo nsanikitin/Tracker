@@ -4,6 +4,9 @@ protocol TrackerCellViewDelegate: AnyObject {
     
     func addCompletedTracker(for trackerID: UUID)
     func removeCompletedTracker(for trackerID: UUID)
+    func deleteTrackerFromCoreData(for trackerID: UUID)
+    func showEditViewController(with navigationController: UINavigationController)
+    func pinOrUnpinTracker(for trackerID: UUID, isPinned: Bool)
 }
 
 final class TrackerCellView: UICollectionViewCell {
@@ -11,6 +14,7 @@ final class TrackerCellView: UICollectionViewCell {
     // MARK: - Properties
     
     static let identifier = "cell"
+    private let analyticsService = AnalyticsService()
     
     private lazy var emojiLabel = UILabel()
     private lazy var nameLabel = UILabel()
@@ -38,13 +42,17 @@ final class TrackerCellView: UICollectionViewCell {
     }
     
     private func setupDaysCounter(for number: Int) {
+        let dayText = NSLocalizedString("day", comment: "День")
+        let daysText = NSLocalizedString("days", comment: "Дней")
+        let anotherDaysText = NSLocalizedString("days.another", comment: "Дня")
+        
         switch number % 100 {
         case 1:
-            daysCounterLabel.text = "\(number) день"
+            daysCounterLabel.text = "\(number) \(dayText)"
         case 2...4:
-            daysCounterLabel.text = "\(number) дня"
+            daysCounterLabel.text = "\(number) \(anotherDaysText)"
         default:
-            daysCounterLabel.text = "\(number) дней"
+            daysCounterLabel.text = "\(number) \(daysText)"
         }
     }
     
@@ -59,7 +67,7 @@ final class TrackerCellView: UICollectionViewCell {
     }
     
     // MARK: - Cell View Configuration
-
+    
     private func setupTrackColorView(with color: UIColor) {
         trackColorView.backgroundColor = color
         
@@ -78,6 +86,7 @@ final class TrackerCellView: UICollectionViewCell {
     
     private func setupEmojiLabel(with emoji: String) {
         emojiLabel.text = emoji
+        emojiLabel.textColor = .ypWhite
         emojiLabel.font = UIFont.systemFont(ofSize: 16)
         emojiLabel.textAlignment = .center
         emojiLabel.backgroundColor = .ypWhite.withAlphaComponent(0.3)
@@ -103,6 +112,7 @@ final class TrackerCellView: UICollectionViewCell {
         nameLabel.textAlignment = .left
         nameLabel.numberOfLines = 2
         nameLabel.lineBreakMode = .byWordWrapping
+        nameLabel.overrideUserInterfaceStyle = .light
         
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(nameLabel)
@@ -114,7 +124,7 @@ final class TrackerCellView: UICollectionViewCell {
         ])
     }
     
-    private func setupDaysCounterLabel(){
+    private func setupDaysCounterLabel() {
         setupDaysCounter(for: completedDaysCounter)
         daysCounterLabel.font = UIFont.systemFont(ofSize: ViewConfigurationConstants.labelFontSize)
         daysCounterLabel.textColor = .ypBlack
@@ -166,5 +176,42 @@ final class TrackerCellView: UICollectionViewCell {
         isTrackerCompleted = !isTrackerCompleted
         setupDaysCounter(for: completedDaysCounter)
         setupCompletedTrack()
+        
+        analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "track"])
+    }
+}
+
+// MARK: - Context Menu Extension
+
+extension TrackerCellView {
+    
+    func configureContextMenu(contextMenuTracker: Tracker, contextMenuCategory: TrackerCategory, isPinned: Bool, isIrregularEvent: Bool, numberOfCompletedDays: Int) -> UIContextMenuConfiguration {
+        return UIContextMenuConfiguration(
+            previewProvider: nil,
+            actionProvider: { actions in
+                return UIMenu(children: [
+                    UIAction(title: isPinned ? "Открепить" : "Закрепить") { [weak self] _ in
+                        self?.delegate?.pinOrUnpinTracker(for: contextMenuTracker.id, isPinned: !isPinned)
+                    },
+                    UIAction(title: "Редактировать") { [weak self] _ in
+                        let vc = TrackerCreationSetupViewController()
+                        vc.isTrackerEditing = true
+                        vc.isHabit = isIrregularEvent ? false : true
+                        self?.setupDaysCounter(for: numberOfCompletedDays)
+                        vc.numberOfCompletedDaysText = self?.daysCounterLabel.text
+                        vc.currentTracker = contextMenuTracker
+                        vc.currentCategory = contextMenuCategory.title
+                        
+                        let navigationController = UINavigationController(rootViewController: vc)
+                        self?.delegate?.showEditViewController(with: navigationController)
+                        self?.analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "edit"])
+                    },
+                    UIAction(title: "Удалить", attributes: .destructive) { [weak self] _ in
+                        self?.delegate?.deleteTrackerFromCoreData(for: contextMenuTracker.id)
+                        self?.analyticsService.report(event: "click", params: ["screen" : "Main", "item" : "delete"])
+                    }
+                ])
+            }
+        )
     }
 }
